@@ -9,11 +9,78 @@ public class MagicCarpet extends Plugin
 	public MagicCarpet()
 	{
 	}
+	public class CarpetFiber
+	{
+		public CarpetFiber(int x, int y, int z, int type)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.type = type;
+		}
+		int x,y,z,type = 0;
+		boolean destroyed = false;
+		boolean imadeit = false;
+	}
 	public class Carpet
 	{
-		public Boolean[] destroyed = {false, false, false, false, false, false, false, false, false};
-		public Boolean[] imadeit = {false, false, false, false, false, false, false, false, false};
-		public Boolean destructable = false;
+		public CarpetFiber[] fibers = {
+			new CarpetFiber(2, 0, 2, 20),
+			new CarpetFiber(2, 0, 1, 20),
+			new CarpetFiber(2, 0, 0, 20),
+			new CarpetFiber(2, 0, -1, 20),
+			new CarpetFiber(2, 0, -2, 20),
+			new CarpetFiber(1, 0, 2, 20),
+			new CarpetFiber(1, 0, 1, 20),
+			new CarpetFiber(1, 0, 0, 20),
+			new CarpetFiber(1, 0, -1, 20),
+			new CarpetFiber(1, 0, -2, 20),
+			new CarpetFiber(0, 0, 2, 20),
+			new CarpetFiber(0, 0, 1, 20),
+			new CarpetFiber(0, 0, 0, 20),
+			new CarpetFiber(0, 0, -1, 20),
+			new CarpetFiber(0, 0, -2, 20),
+			new CarpetFiber(-1, 0, 2, 20),
+			new CarpetFiber(-1, 0, 1, 20),
+			new CarpetFiber(-1, 0, 0, 20),
+			new CarpetFiber(-1, 0, -1, 20),
+			new CarpetFiber(-1, 0, -2, 20),
+			new CarpetFiber(-2, 0, 2, 20),
+			new CarpetFiber(-2, 0, 1, 20),
+			new CarpetFiber(-2, 0, 0, 20),
+			new CarpetFiber(-2, 0, -1, 20),
+			new CarpetFiber(-2, 0, -2, 20)
+			};
+		Location currentLoc;
+		public void removeCarpet() {
+			if (currentLoc == null)
+				return;
+			for(int i = 0; i < fibers.length; i++)
+			{
+				if (fibers[i].imadeit) etc.getServer().setBlockAt(0, (int)currentLoc.x + fibers[i].x, (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z);
+				fibers[i].imadeit = false;
+			}
+		}
+		public void drawCarpet() {
+			for(int i = 0; i < fibers.length; i++)
+			{
+				if (!fibers[i].destroyed && etc.getServer().getBlockAt((int)currentLoc.x + fibers[i].x, (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z).getType() == 0) {
+					fibers[i].imadeit = true;
+					etc.getServer().setBlockAt(fibers[i].type, (int)currentLoc.x + fibers[i].x, (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z);
+				} else {
+					fibers[i].imadeit = false;
+				}
+			}
+		}
+		public CarpetFiber getCenterFiber()
+		{
+			for(int i = 0; i < fibers.length; i++)
+			{
+				if(fibers[i].x == 0 && fibers[i].y == 0 && fibers[i].z == 0)
+					return fibers[i];
+			}
+			return null;
+		}
 	}
 	public void enable()
 	{
@@ -39,15 +106,7 @@ public class MagicCarpet extends Plugin
 					player.sendMessage("Poof! The carpet disappears");
 					carpets.remove(player.getName());
 					Location from = player.getLocation();
-					if (carpet.imadeit[0]) etc.getServer().setBlockAt(0, (int)from.x + 1, (int)from.y - 1, (int)from.z + 1);
-					if (carpet.imadeit[1]) etc.getServer().setBlockAt(0, (int)from.x + 1, (int)from.y - 1, (int)from.z);
-					if (carpet.imadeit[2]) etc.getServer().setBlockAt(0, (int)from.x + 1, (int)from.y - 1, (int)from.z - 1);
-					if (carpet.imadeit[3]) etc.getServer().setBlockAt(0, (int)from.x, (int)from.y - 1, (int)from.z + 1);
-					if (carpet.imadeit[4]) etc.getServer().setBlockAt(0, (int)from.x, (int)from.y - 1, (int)from.z);
-					if (carpet.imadeit[5]) etc.getServer().setBlockAt(0, (int)from.x, (int)from.y - 1, (int)from.z - 1);
-					if (carpet.imadeit[6]) etc.getServer().setBlockAt(0, (int)from.x - 1, (int)from.y - 1, (int)from.z + 1);
-					if (carpet.imadeit[7]) etc.getServer().setBlockAt(0, (int)from.x - 1, (int)from.y - 1, (int)from.z);
-					if (carpet.imadeit[8]) etc.getServer().setBlockAt(0, (int)from.x - 1, (int)from.y - 1, (int)from.z - 1);
+					carpet.removeCarpet();
 				}
 				return true;
 			}
@@ -62,21 +121,13 @@ public class MagicCarpet extends Plugin
 		Carpet carpet = (Carpet)carpets.get(player.getName());
 		if (carpet == null)
 			return false;
-		if(!carpet.imadeit[4])
+		if(!carpet.getCenterFiber().imadeit)
 			return false;
 		Location from = player.getLocation();
 		if((int)from.x != block.getX() || ((int)from.y -1) != block.getY() || (int)from.z != block.getZ())
 			return false;
 			
-		if (carpet.imadeit[0]) etc.getServer().setBlockAt(0, (int)from.x + 1, (int)from.y - 1, (int)from.z + 1);
-		if (carpet.imadeit[1]) etc.getServer().setBlockAt(0, (int)from.x + 1, (int)from.y - 1, (int)from.z);
-		if (carpet.imadeit[2]) etc.getServer().setBlockAt(0, (int)from.x + 1, (int)from.y - 1, (int)from.z - 1);
-		if (carpet.imadeit[3]) etc.getServer().setBlockAt(0, (int)from.x, (int)from.y - 1, (int)from.z + 1);
-		if (carpet.imadeit[4]) etc.getServer().setBlockAt(0, (int)from.x, (int)from.y - 1, (int)from.z);
-		if (carpet.imadeit[5]) etc.getServer().setBlockAt(0, (int)from.x, (int)from.y - 1, (int)from.z - 1);
-		if (carpet.imadeit[6]) etc.getServer().setBlockAt(0, (int)from.x - 1, (int)from.y - 1, (int)from.z + 1);
-		if (carpet.imadeit[7]) etc.getServer().setBlockAt(0, (int)from.x - 1, (int)from.y - 1, (int)from.z);
-		if (carpet.imadeit[8]) etc.getServer().setBlockAt(0, (int)from.x - 1, (int)from.y - 1, (int)from.z - 1);
+		carpet.removeCarpet();
 		
 		return true;
 	}
@@ -86,56 +137,18 @@ public class MagicCarpet extends Plugin
 		Carpet carpet = (Carpet)carpets.get(player.getName());
 		if (carpet == null)
 			return;
-		// Remove my old carpet!
-		if (carpet.imadeit[0]) etc.getServer().setBlockAt(0, (int)from.x + 1, (int)from.y - 1, (int)from.z + 1);
-		if (carpet.imadeit[1]) etc.getServer().setBlockAt(0, (int)from.x + 1, (int)from.y - 1, (int)from.z);
-		if (carpet.imadeit[2]) etc.getServer().setBlockAt(0, (int)from.x + 1, (int)from.y - 1, (int)from.z - 1);
-		if (carpet.imadeit[3]) etc.getServer().setBlockAt(0, (int)from.x, (int)from.y - 1, (int)from.z + 1);
-		if (carpet.imadeit[4]) etc.getServer().setBlockAt(0, (int)from.x, (int)from.y - 1, (int)from.z);
-		if (carpet.imadeit[5]) etc.getServer().setBlockAt(0, (int)from.x, (int)from.y - 1, (int)from.z - 1);
-		if (carpet.imadeit[6]) etc.getServer().setBlockAt(0, (int)from.x - 1, (int)from.y - 1, (int)from.z + 1);
-		if (carpet.imadeit[7]) etc.getServer().setBlockAt(0, (int)from.x - 1, (int)from.y - 1, (int)from.z);
-		if (carpet.imadeit[8]) etc.getServer().setBlockAt(0, (int)from.x - 1, (int)from.y - 1, (int)from.z - 1);
-		
-		if (!carpet.destroyed[0] && etc.getServer().getBlockAt((int)to.x + 1, (int)to.y - 1, (int)to.z + 1).getType() == 0) {
-			carpet.imadeit[0] = true;
-			etc.getServer().setBlockAt(20, (int)to.x + 1, (int)to.y - 1, (int)to.z + 1);
-		} else { carpet.imadeit[0] = false; }
-		if (!carpet.destroyed[1] && etc.getServer().getBlockAt((int)to.x + 1, (int)to.y - 1, (int)to.z).getType() == 0) {
-			carpet.imadeit[1] = true;
-			etc.getServer().setBlockAt(20, (int)to.x + 1, (int)to.y - 1, (int)to.z);
-		} else { carpet.imadeit[1] = false; }
-		if (!carpet.destroyed[2] && etc.getServer().getBlockAt((int)to.x + 1, (int)to.y - 1, (int)to.z - 1).getType() == 0) {
-			carpet.imadeit[2] = true;
-			etc.getServer().setBlockAt(20, (int)to.x + 1, (int)to.y - 1, (int)to.z - 1);
-		} else { carpet.imadeit[2] = false; }
-		
-		if (!carpet.destroyed[3] && etc.getServer().getBlockAt((int)to.x, (int)to.y - 1, (int)to.z + 1).getType() == 0) {
-			carpet.imadeit[3] = true;
-			etc.getServer().setBlockAt(20, (int)to.x, (int)to.y - 1, (int)to.z + 1);
-		} else { carpet.imadeit[3] = false; }
-		if (!carpet.destroyed[4] && etc.getServer().getBlockAt((int)to.x, (int)to.y - 1, (int)to.z).getType() == 0) {
-			carpet.imadeit[4] = true;
-			etc.getServer().setBlockAt(20, (int)to.x, (int)to.y - 1, (int)to.z);
-		} else { carpet.imadeit[4] = false; }
-		if (!carpet.destroyed[5] && etc.getServer().getBlockAt((int)to.x, (int)to.y - 1, (int)to.z - 1).getType() == 0) {
-			carpet.imadeit[5] = true;
-			etc.getServer().setBlockAt(20, (int)to.x, (int)to.y - 1, (int)to.z - 1);
-		} else { carpet.imadeit[5] = false; }
-		
-		if (!carpet.destroyed[6] && etc.getServer().getBlockAt((int)to.x - 1, (int)to.y - 1, (int)to.z + 1).getType() == 0) {
-			carpet.imadeit[6] = true;
-			etc.getServer().setBlockAt(20, (int)to.x - 1, (int)to.y - 1, (int)to.z + 1);
-		} else { carpet.imadeit[6] = false; }
-		if (!carpet.destroyed[7] && etc.getServer().getBlockAt((int)to.x - 1, (int)to.y - 1, (int)to.z).getType() == 0) {
-			carpet.imadeit[7] = true;
-			etc.getServer().setBlockAt(20, (int)to.x - 1, (int)to.y - 1, (int)to.z);
-		} else { carpet.imadeit[7] = false; }
-		if (!carpet.destroyed[8] && etc.getServer().getBlockAt((int)to.x - 1, (int)to.y - 1, (int)to.z - 1).getType() == 0) {
-			carpet.imadeit[8] = true;
-			etc.getServer().setBlockAt(20, (int)to.x - 1, (int)to.y - 1, (int)to.z - 1);
-		} else { carpet.imadeit[8] = false; }
+		carpet.removeCarpet();
+		to.y = to.y-1;
+		carpet.currentLoc = to;
+		carpet.drawCarpet();
 
+	}
+	public void onDisconnect(Player player) {
+		Carpet carpet = (Carpet)carpets.get(player.getName());
+		if (carpet == null)
+			return;
+		carpets.remove(player.getName());
+		carpet.removeCarpet();
 	}
 }
 
