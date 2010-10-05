@@ -12,12 +12,12 @@ import java.util.Hashtable;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.*;
 
 public class WaypointPlugin extends Plugin
 {
 	private static Logger a = Logger.getLogger("Minecraft");
 	private Dictionary<String, User> users = new Hashtable<String, User>();
+	private boolean initialized = false;
 	public String wpLoc = "waypoints.txt";
 	public class Waypoint {
 		public String name;
@@ -71,7 +71,7 @@ public class WaypointPlugin extends Plugin
 			return "";
 		}
 	}
-	
+
 	public class User {
 		public Dictionary<String, Waypoint> waypoints = new Hashtable<String, Waypoint>();
 		public Waypoint spawnPoint = new Waypoint("");
@@ -81,24 +81,31 @@ public class WaypointPlugin extends Plugin
 			this.spawnPoint.location = etc.getServer().getSpawnLocation();
 		}
 	}
-	
+
 	public WaypointPlugin()
 	{
 		setName("Waypoints by chrisinajar");
-        if (!(new File(wpLoc).exists())) {
+	}
+
+	public void init()
+	{
+		if(initialized)
+			return;
+		initialized = true;
+        	if (!(new File(wpLoc).exists())) {
 			FileWriter writer = null;
 			try {
-					writer = new FileWriter(wpLoc);
-					writer.write("#Don't edit this file\r\n");
-                } catch (Exception e) {
-					a.log(Level.SEVERE, "Exception while creating " + wpLoc, e);
-                } finally {
-					if (writer != null) {
-						try {
-							writer.close();
-						} catch (IOException e) {
+				writer = new FileWriter(wpLoc);
+				writer.write("#Don't edit this file\r\n");
+	                } catch (Exception e) {
+				a.log(Level.SEVERE, "Exception while creating " + wpLoc, e);
+                	} finally {
+				if (writer != null) {
+					try {
+						writer.close();
+					} catch (IOException e) {
 					}
-                }
+                		}
 			}
 		}
 		this.reload();
@@ -114,6 +121,7 @@ public class WaypointPlugin extends Plugin
 
 	public boolean onCommand(Player e, String[] split)
 	{
+		init();
 		try {
 			if (split[0].equalsIgnoreCase("/setwp")) {
 				if (split.length < 2) {
@@ -161,7 +169,7 @@ public class WaypointPlugin extends Plugin
 				return false;
 			}
 		} catch (Exception ex) {
-			a.log(Level.SEVERE, "Exception in command handler (Report this to hey0):", ex);
+			a.log(Level.SEVERE, "Exception in command handler (Report this to chrisinajar):", ex);
 			return false;
 		}
 		return true;
@@ -175,7 +183,7 @@ public class WaypointPlugin extends Plugin
 		// seperator
 		return builder.toString();
 	}
-	
+
 	public String getPlayerName(String name) {
 		for (Enumeration i = users.keys(); i.hasMoreElements();)
 		{
@@ -183,7 +191,7 @@ public class WaypointPlugin extends Plugin
 			if(name.equalsIgnoreCase(pname))
 				return pname;
 		}
-		return etc.getServer().getPlayerName(name);
+		return etc.getServer().matchPlayer(name).getName();
 	}
 
 	public String listWaypoints(String player)
