@@ -93,7 +93,7 @@ public class MagicCarpet extends Plugin
 	public boolean onCommand(Player player, String[] split)
 	{
 		try {
-			if (split[0].equalsIgnoreCase("/magiccarpet")) {
+			if (split[0].equalsIgnoreCase("/magiccarpet") && player.canUseCommand("/magiccarpet")) {
 				Carpet carpet = (Carpet)carpets.get(player.getName());
 				if (carpet == null)
 				{
@@ -139,6 +139,8 @@ public class MagicCarpet extends Plugin
 			return;
 		carpet.removeCarpet();
 		to.y = to.y-1;
+		if(player.getPitch() == 90)
+			to.y = to.y-1;
 		carpet.currentLoc = to;
 		carpet.drawCarpet();
 
