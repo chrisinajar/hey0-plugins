@@ -4,6 +4,8 @@
  */
 public class SampleHitBlox extends Plugin
 {
+	static final SampleHitBloxListener listener = new SampleHitBloxListener();
+	
 	public void enable()
 	{
 	}
@@ -12,20 +14,8 @@ public class SampleHitBlox extends Plugin
 	{
 	}
 	
-	//Hooking on arm animation (beware, this triggers on both left and right click for placeable blocks)
-	public void onArmSwing(Player player)
+	public void initialize()
 	{
-		//If holding a block, left click to place anywhere!
-		if ((player.canUseCommand("/SampleHitBlox")) && (player.getItemInHand() < 100))
-		{
-			HitBlox blox = new HitBlox(player);
-			blox.setFaceBlock(player.getItemInHand());
-		}
-		//If holding a wooden stick, left click to delete blocks!
-		else if ((player.canUseCommand("/SampleHitBlox")) && (player.getItemInHand() == 280))
-		{
-			HitBlox blox = new HitBlox(player);
-			blox.setTargetBlock(0);
-		}
-	}
+        etc.getLoader().addListener(PluginLoader.Hook.ARM_SWING, listener, this, PluginListener.Priority.MEDIUM);
+    }
 }
