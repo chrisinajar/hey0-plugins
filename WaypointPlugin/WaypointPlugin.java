@@ -123,7 +123,7 @@ public class WaypointPlugin extends Plugin
 	{
 		init();
 		try {
-			if (split[0].equalsIgnoreCase("/setwp")) {
+			if (split[0].equalsIgnoreCase("/setwp") && e.canUseCommand("/wp")) {
 				if (split.length < 2) {
 					e.sendMessage("§cCorrect usage is: /setwp [name]");
 					return true;
