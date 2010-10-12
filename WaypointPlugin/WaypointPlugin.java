@@ -129,15 +129,19 @@ public class WaypointPlugin extends Plugin
 					return true;
 				}
 				setWaypoint(e, split[1]);
-			} else if (split[0].equalsIgnoreCase("/wp")) {
+			} else if (split[0].equalsIgnoreCase("/wp") && e.canUseCommand("/wp")) {
 				if (split.length < 2) {
-					e.sendMessage("§cCorrect usage is: /wp (player) [name] -- only name is required");
+					if(e.canUseCommand("/wpother"))
+						e.sendMessage("§cCorrect usage is: /wp (player) [name] -- only name is required");
+					else
+						e.sendMessage("§cCorrect usage is: /wp [name]");
 					return true;
 				}
 				String wpname = split[1];
 				String player = e.getName();
 				if (split.length > 2) {
-					player = split[1];
+					if(e.canUseCommand("/wpother"))
+						player = split[1];
 					wpname = split[2];
 				}
 				Waypoint wp = getWaypoint(player, wpname);
@@ -149,13 +153,13 @@ public class WaypointPlugin extends Plugin
 				
 				a.info(e.getName() + " used " + player + "'s wp");
 				e.teleportTo(wp.location);
-			} else if (split[0].equalsIgnoreCase("/listwp")) {
+			} else if (split[0].equalsIgnoreCase("/listwp") && e.canUseCommand("/wp")) {
 				String player = e.getName();
-				if (split.length > 1) {
+				if (split.length > 1 && e.canUseCommand("/listwpother")) {
 					player = split[1];
 				}
 				e.sendMessage("§cWaypoints: " + listWaypoints(player));
-			} else if (split[0].equalsIgnoreCase("/rmwp")) {
+			} else if (split[0].equalsIgnoreCase("/rmwp") && e.canUseCommand("/wp")) {
 				if (split.length < 2) {
 					e.sendMessage("§cCorrect usage is: /rmwp [name]");
 					return true;
