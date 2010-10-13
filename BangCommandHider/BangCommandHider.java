@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 public class BangCommandHider extends Plugin
 {
 	private static Logger a = Logger.getLogger("Minecraft");
-	private Listener l = new Listener();
+	private Listener l = new Listener(this);
 
 	public void enable() { }
 	
@@ -17,6 +17,11 @@ public class BangCommandHider extends Plugin
 	public void disable() { }
 
 	public class Listener extends PluginListener {
+		BangCommandHider plugin;
+		Listener(BangCommandHider p) {
+			plugin = p;
+		}
+
 		public boolean onChat(Player player, String message) {
 			if (message.startsWith("!")) {
 			a.log(Level.INFO, "<" + player.getName() + "> " + message);
