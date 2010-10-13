@@ -2,6 +2,10 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
 
+/*
+ * QUICKPORT v0.2.0
+ */
+
 public class QuickPort extends Plugin
 {
     private QuickPortListener listener = new QuickPortListener();
@@ -61,12 +65,20 @@ public class QuickPort extends Plugin
                     player.sendMessage("QuickPort Mode: [Tunnel]");
                     break;
                 case TUNNEL:
-                    mode = Mode.SELECT;
-                    firstSelect = true;
-                    player.sendMessage("QuickPort Mode: [Select Target]");
+                    if (player.canUseCommand("/QuickPortOthers"))
+                    {
+                        mode = Mode.SELECT;
+                        firstSelect = true;
+                        player.sendMessage("QuickPort Mode: [Select Target]");
+                    }
+                    else
+                    {
+                        mode = Mode.SELF;
+                        player.sendMessage("QuickPort Mode: [Normal]");
+                    }
                     break;
                 case SELECT:
-                    if (firstSelect)
+                    if (firstSelect || !player.canUseCommand("/QuickPortOthers")) //neurotic
                     {
                         mode = Mode.SELF;
                         player.sendMessage("QuickPort Mode: [Normal]");
