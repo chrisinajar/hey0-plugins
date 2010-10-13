@@ -6,6 +6,7 @@ public class QuickPort extends Plugin
 {
 	private QuickPortListener listener = new QuickPortListener();
 	private Hashtable playerSettings = new Hashtable();
+	private enum Mode { SELF, TUNNEL, SELECT, PLAYER };
 
 	public void enable()
 	{
@@ -36,8 +37,88 @@ public class QuickPort extends Plugin
 	
 	public class QuickPortSettings
 	{
+		public Mode mode = Mode.SELF;
 		public Player targetPlayer;
-		public boolean tunnelMode = false;
+		public boolean firstSelect;
+		
+		public boolean modeIs(Mode in_mode)
+		{
+			
+			return (mode == in_mode);
+		}
+		
+		public void setMode(Mode in_mode)
+		{
+			mode = in_mode;
+		}
+		
+		public void switchMode(Player player)
+		{
+			switch (mode)
+			{
+				case SELF:
+					mode = Mode.TUNNEL;
+					player.sendMessage("QuickPort Mode: [Tunnel]");
+					break;
+				case TUNNEL:
+					mode = Mode.SELECT;
+					firstSelect = true;
+					player.sendMessage("QuickPort Mode: [Select Target]");
+					break;
+				case SELECT:
+					if (firstSelect)
+					{
+						mode = Mode.SELF;
+						player.sendMessage("QuickPort Mode: [Normal]");
+					}
+					else
+					{
+						mode = Mode.PLAYER;
+						player.sendMessage("QuickPort Mode: [Target]");
+					}
+					break;
+				default:
+					mode = Mode.SELF;
+					player.sendMessage("QuickPort Mode: [Normal]");
+					break;
+			}
+		}
+		
+		public void selectPlayer(Player player)
+		{
+			if (firstSelect && targetPlayer != null)
+			{
+				firstSelect = false;
+				player.sendMessage("QuickPort Target: " + targetPlayer.getName());
+			}
+			else
+			{
+				List<Player> players = etc.getServer().getPlayerList();
+				int index = -1;
+				
+				if (targetPlayer != null)
+					index = players.indexOf(targetPlayer);
+					
+				//Loop around the top
+				if (index + 1 >= players.size())
+					targetPlayer = players.get(0);
+				else
+					targetPlayer = players.get(index + 1);
+
+				//Skip self
+				if (targetPlayer == player)
+				{
+					index = players.indexOf(targetPlayer);
+					if (index + 1 >= players.size())
+						targetPlayer = players.get(0);
+					else
+						targetPlayer = players.get(index + 1);
+				}
+				
+			}
+		}
+		
+		
 	}
 	
 	public class QuickPortListener extends PluginListener
@@ -48,16 +129,13 @@ public class QuickPort extends Plugin
 			{
 				QuickPortSettings settings = getSettings(player);
 
-				//if(etc.getLoader().getPlugin("QuickPort") != null && etc.getLoader().getPlugin("QuickPort") instanceof QuickPort)
-				//	player.sendMessage("QuickPort: test: " + (QuickPort)(etc.getLoader().getPlugin("QuickPort")).test);
-				
 				Location playerLoc;
 				if (settings.targetPlayer == null)
 					playerLoc = player.getLocation();
 				else
 					playerLoc = settings.targetPlayer.getLocation();
 				
-				if (!settings.tunnelMode)
+				if (settings.modeIs(Mode.SELF) || settings.modeIs(Mode.PLAYER))
 				{
 					HitBlox blox = new HitBlox(player, 300, 0.3);
 					if (blox.getTargetBlock() != null)
@@ -72,18 +150,18 @@ public class QuickPort extends Plugin
 								playerLoc.y = blox.getCurBlock().getY() + i;
 								playerLoc.z = blox.getCurBlock().getZ() + .5;
 								
-								if (settings.targetPlayer == null)
+								if (settings.modeIs(Mode.PLAYER))
 									player.teleportTo(playerLoc);
 								else
 									settings.targetPlayer.teleportTo(playerLoc);
 									
-								settings.targetPlayer = null;
+								settings.setMode(Mode.SELF);
 								i = 100;
 							}
 						}
 					}
 				}
-				else
+				else if (settings.modeIs(Mode.TUNNEL))
 				{
 					HitBlox blox = new HitBlox(player, 300, 0.3);
 					while ((blox.getNextBlock() != null) && ((blox.getCurBlock().getType() != 0) || ((blox.getLastBlock().getType() == 0))));
@@ -108,7 +186,10 @@ public class QuickPort extends Plugin
 						}
 					}
 				}
-
+				else if (settings.modeIs(Mode.SELECT))
+				{
+					settings.selectPlayer(player);
+				}
 			}
 		}
 		
@@ -118,35 +199,7 @@ public class QuickPort extends Plugin
 			if ((player.canUseCommand("/QuickPort")) && (itemInHand == 345))
 			{
 				QuickPortSettings settings = getSettings(player);
-				List<Player> players = etc.getServer().getPlayerList();
-				int index = -1;
-				
-				if (settings.targetPlayer == null)
-						index = -1;
-				else
-					index = players.indexOf(settings.targetPlayer);
-					
-					
-				if ((settings.targetPlayer == null) && (settings.tunnelMode))
-					settings.tunnelMode = false;
-				else if (((index + 1 >= players.size()) || (players.get(index + 1) == player && index + 2 >= players.size())) || !player.canUseCommand("/QuickPortOthers"))
-				{
-					settings.tunnelMode = true;
-					settings.targetPlayer = null;
-				}
-				else if (players.get(index + 1) == player && index + 2 < players.size())
-					settings.targetPlayer = players.get(index + 2);
-				else
-					settings.targetPlayer = players.get(index + 1);
-
-				if (settings.targetPlayer == null && settings.tunnelMode)
-					player.sendMessage("QuickPort Target: [Self] (Tunnel)");
-				else if (settings.targetPlayer == null)
-					player.sendMessage("QuickPort Target: [Self]");
-				else
-					player.sendMessage("QuickPort Target: " + settings.targetPlayer.getName());
-						
-						
+				settings.switchMode(player);	
 			}
 			return(false);
 		}
