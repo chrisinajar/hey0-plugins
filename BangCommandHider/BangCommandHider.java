@@ -8,7 +8,10 @@ public class BangCommandHider extends Plugin
 	private static Logger a = Logger.getLogger("Minecraft");
 	private Listener l = new Listener();
 
-	public void enable() {
+	public void enable() { }
+	
+	public void initialize()
+	{
 		etc.getLoader().addListener(PluginLoader.Hook.CHAT, l, this, PluginListener.Priority.MEDIUM);
 	}
 	public void disable() { }
