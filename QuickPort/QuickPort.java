@@ -7,10 +7,18 @@ public class QuickPort extends Plugin
 	private QuickPortListener listener = new QuickPortListener();
 	private Hashtable playerSettings = new Hashtable();
 
-	public class QuickPortSettings
+	public void enable()
 	{
-		public Player targetPlayer;
-		public boolean tunnelMode = false;
+	}
+
+	public void disable()
+	{
+	}
+	
+	public void initialize()
+	{
+		etc.getLoader().addListener(PluginLoader.Hook.ARM_SWING, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener, this, PluginListener.Priority.MEDIUM);
 	}
 
 	//Returns a QuickPortSettings for the player, making a new one if it has to
@@ -25,22 +33,12 @@ public class QuickPort extends Plugin
 
 		return(settings);
 	}
-
 	
-	public void enable()
+	public class QuickPortSettings
 	{
+		public Player targetPlayer;
+		public boolean tunnelMode = false;
 	}
-
-	public void disable()
-	{
-	}
-	
-	public void initialize()
-	{
-		etc.getLoader().addListener(PluginLoader.Hook.ARM_SWING, listener, this, PluginListener.Priority.MEDIUM);
-        etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener, this, PluginListener.Priority.MEDIUM);
-    }
-	
 	
 	public class QuickPortListener extends PluginListener
 	{
