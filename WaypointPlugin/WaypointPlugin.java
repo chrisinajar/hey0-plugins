@@ -125,16 +125,16 @@ public class WaypointPlugin extends Plugin
 		try {
 			if (split[0].equalsIgnoreCase("/setwp") && e.canUseCommand("/wp")) {
 				if (split.length < 2) {
-					e.sendMessage("§cCorrect usage is: /setwp [name]");
+					e.sendMessage("Correct usage is: /setwp [name]");
 					return true;
 				}
 				setWaypoint(e, split[1]);
 			} else if (split[0].equalsIgnoreCase("/wp") && e.canUseCommand("/wp")) {
 				if (split.length < 2) {
 					if(e.canUseCommand("/wpother"))
-						e.sendMessage("§cCorrect usage is: /wp (player) [name] -- only name is required");
+						e.sendMessage("Correct usage is: /wp (player) [name] -- only name is required");
 					else
-						e.sendMessage("§cCorrect usage is: /wp [name]");
+						e.sendMessage("Correct usage is: /wp [name]");
 					return true;
 				}
 				String wpname = split[1];
@@ -147,7 +147,7 @@ public class WaypointPlugin extends Plugin
 				Waypoint wp = getWaypoint(player, wpname);
 				if(wp == null)
 				{
-					e.sendMessage("§cFailed to find a waypoint by that name");
+					e.sendMessage("Failed to find a waypoint by that name");
 					return true;
 				}
 				
@@ -158,17 +158,17 @@ public class WaypointPlugin extends Plugin
 				if (split.length > 1 && e.canUseCommand("/listwpother")) {
 					player = split[1];
 				}
-				e.sendMessage("§cWaypoints: " + listWaypoints(player));
+				e.sendMessage("Waypoints: " + listWaypoints(player));
 			} else if (split[0].equalsIgnoreCase("/rmwp") && e.canUseCommand("/wp")) {
 				if (split.length < 2) {
-					e.sendMessage("§cCorrect usage is: /rmwp [name]");
+					e.sendMessage("Correct usage is: /rmwp [name]");
 					return true;
 				}
 				removeWaypoint(e, split[1]);
-				e.sendMessage("§cWaypoint removed.");
+				e.sendMessage("Waypoint removed.");
 			} else if (split[0].equalsIgnoreCase("/loc")) {
 				a.info(e.getName() + " is located at " + e.getX() + ", " + e.getY() + ", " + e.getZ());
-				e.sendMessage("§cCurrect location:" + (int)e.getX() + ", " + (int)e.getY() + ", " + (int)e.getZ());
+				e.sendMessage("Currect location:" + (int)e.getX() + ", " + (int)e.getY() + ", " + (int)e.getZ());
 			} else {
 				return false;
 			}
@@ -251,7 +251,10 @@ public class WaypointPlugin extends Plugin
 			wp = new Waypoint("");
 			user.waypoints.put(name, wp);
 			wp.name = name;
+			e.sendMessage("Created new waypoint called: " + name);
 		}
+		else
+			e.sendMessage("Updated location for waypoint: " + name);
 		wp.location = e.getLocation();
 		writeWaypoint(e, user);
 	}
