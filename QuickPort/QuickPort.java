@@ -62,43 +62,43 @@ public class QuickPort extends Plugin
             {
                 case SELF:
                     mode = Mode.TUNNEL;
-                    player.sendMessage("QuickPort Mode: [Tunnel]");
+                    player.sendMessage("QuickPort Mode: " + Colors.LightGreen + "Tunnel");
                     break;
                 case TUNNEL:
-                    if (player.canUseCommand("/QuickPortOthers"))
+                    if (player.canUseCommand("/QuickPortOther") && etc.getServer().getPlayerList().size() > 1)
                     {
                         mode = Mode.SELECT;
                         firstSelect = true;
-                        player.sendMessage("QuickPort Mode: [Select Target]");
+                        player.sendMessage("QuickPort Mode: " + Colors.LightPurple + "Select Player");
                     }
                     else
                     {
                         mode = Mode.SELF;
-                        player.sendMessage("QuickPort Mode: [Normal]");
+                        player.sendMessage("QuickPort Mode: " + Colors.LightGray + "Normal");
                     }
                     break;
                 case SELECT:
-                    if (firstSelect || !player.canUseCommand("/QuickPortOthers")) //neurotic
+                    if (firstSelect || !player.canUseCommand("/QuickPortOther")) //neurotic
                     {
                         mode = Mode.SELF;
-                        player.sendMessage("QuickPort Mode: [Normal]");
+                        player.sendMessage("QuickPort Mode: " + Colors.LightGray + "Normal");
                     }
                     else
                     {
                         mode = Mode.PLAYER;
-                        player.sendMessage("QuickPort Mode: [Target]");
+                        player.sendMessage("QuickPort Mode: " + Colors.LightBlue + " Target (" + Colors.White + targetPlayer.getName() + Colors.LightBlue + ")");
                     }
                     break;
                 default:
                     mode = Mode.SELF;
-                    player.sendMessage("QuickPort Mode: [Normal]");
+                    player.sendMessage("QuickPort Mode: " + Colors.LightGray + "Normal");
                     break;
             }
         }
         
         public void selectPlayer(Player player)
         {
-            if (firstSelect && targetPlayer != null)
+            if (firstSelect && targetPlayer != null && etc.getServer().getPlayerList().contains(targetPlayer))
             {
                 firstSelect = false;
                 player.sendMessage("QuickPort Target: " + targetPlayer.getName());
@@ -126,6 +126,7 @@ public class QuickPort extends Plugin
                     else
                         targetPlayer = players.get(index + 1);
                 }
+				player.sendMessage("QuickPort Target: " + targetPlayer.getName());
             }
         }
         
@@ -141,10 +142,10 @@ public class QuickPort extends Plugin
                 QuickPortSettings settings = getSettings(player);
 
                 Location playerLoc;
-                if (settings.targetPlayer == null)
-                    playerLoc = player.getLocation();
+                if (settings.modeIs(Mode.PLAYER))
+					playerLoc = settings.targetPlayer.getLocation();
                 else
-                    playerLoc = settings.targetPlayer.getLocation();
+                    playerLoc = player.getLocation();
                 
                 if (settings.modeIs(Mode.SELF) || settings.modeIs(Mode.PLAYER))
                 {
@@ -162,9 +163,9 @@ public class QuickPort extends Plugin
                                 playerLoc.z = blox.getCurBlock().getZ() + .5;
                                 
                                 if (settings.modeIs(Mode.PLAYER))
-                                    player.teleportTo(playerLoc);
+									settings.targetPlayer.teleportTo(playerLoc);
                                 else
-                                    settings.targetPlayer.teleportTo(playerLoc);
+                                    player.teleportTo(playerLoc);
                                     
                                 settings.setMode(Mode.SELF);
                                 i = 100;
