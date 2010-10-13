@@ -1,4 +1,5 @@
 import java.util.Hashtable;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -88,6 +89,13 @@ public class MagicCarpet extends Plugin
 	
 	public void disable()
 	{
+		Enumeration e = carpets.elements();
+		//iterate through Hashtable keys Enumeration
+		while(e.hasMoreElements()) {
+			Carpet c = (Carpet)e.nextElement();
+			c.removeCarpet();
+		}
+		carpets.clear();
 	}
 
 	public boolean onCommand(Player player, String[] split)
