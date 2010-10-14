@@ -54,6 +54,7 @@ public class RunePluginLoader {
     public void loadRunePlugin(String fileName) {
         if (getRunePlugin(fileName) != null)
             return; //Already exists.
+		log.log(Level.INFO, "Loading RunePlugin:" + fileName);
         load(fileName);
     }
 
