@@ -3,10 +3,10 @@ public class RuneCraftRegisteredListener {
     //private int[][] pattern;
 	private HoobRune rune;
     private RuneCraftListener listener;
-    private Plugin plugin;
+    private RunePlugin plugin;
 
 //    public RuneCraftRegisteredListener(int[][] pat, RuneCraftListener l, Plugin p) {
-    public RuneCraftRegisteredListener(HoobRune r, RuneCraftListener l, Plugin p) {
+    public RuneCraftRegisteredListener(HoobRune r, RuneCraftListener l, RunePlugin p) {
 //        pattern = pat;
 		rune = r;
         listener = l;
@@ -24,7 +24,7 @@ public class RuneCraftRegisteredListener {
         return listener;
     }
 
-    public Plugin getPlugin() {
+    public RunePlugin getRunePlugin() {
         return plugin;
     }
 

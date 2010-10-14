@@ -9,39 +9,9 @@ public class HoobRunes extends Plugin
 	private static Logger a = Logger.getLogger("Minecraft");
 	private HoobRunesListener listener = new HoobRunesListener();
 	public static ArrayList<HoobRune> runes = new ArrayList<HoobRune>();
-	private List<RuneCraftRegisteredListener> regListeners = new ArrayList<RuneCraftRegisteredListener>();
-
-	
-	public RuneCraftRegisteredListener addListener(HoobRune rune, RuneCraftListener listener, Plugin plugin)
-	{
-    	RuneCraftRegisteredListener reg = new RuneCraftRegisteredListener(rune, listener, plugin);
-	    regListeners.add(reg);
-    	return reg;
-    }
-	
-	public static Hashtable playerSettings = new Hashtable();
-
-	public static HoobRunesSettings getSettings(Player player)
-	{
-		HoobRunesSettings settings = (HoobRunesSettings)playerSettings.get(player.getName());
-		if (settings == null)
-		{
-			playerSettings.put(player.getName(), new HoobRunesSettings());
-			settings = (HoobRunesSettings)playerSettings.get(player.getName());
-		}
-
-		return(settings);
-	}
-	
-	
-	//private enum Direction { NORTH, SOUTH, EAST, WEST, UP, DOWN, NONE }
-	
-	public static class HoobRunesSettings
-	{
-		public Player targetPlayer;
-		public boolean tunnelMode = false;
-	}
-	
+	//private List<RuneCraftRegisteredListener> regListeners = new ArrayList<RuneCraftRegisteredListener>();
+	public RunePluginLoader runeloader = new RunePluginLoader(this);
+    
 	public void enable()
 	{
 		/*
@@ -82,6 +52,7 @@ public class HoobRunes extends Plugin
 	{
         etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener, this, PluginListener.Priority.MEDIUM);
 		a.log(Level.INFO, "HoobRunes Initialized!");
+		runeloader.loadRunePlugins();
     }
 	
 	public class HoobRunesListener extends PluginListener
@@ -93,15 +64,15 @@ public class HoobRunes extends Plugin
 			if ((player.canUseCommand("/HoobRunes")) && (itemInHand == 76))
 			{
 				player.sendMessage("GOT A TORCH!");
-			
-				HoobRunes.HoobRunesSettings settings = HoobRunes.getSettings(player);
+				runeloader.callHook(player, blockPlaced, blockClicked, itemInHand);
 				
+				/*
 				for (RuneCraftRegisteredListener rl : regListeners)
 				{
 					
 				
 				/*
-				for (HoobRune r : HoobRunes.runes) */
+				for (HoobRune r : HoobRunes.runes) 
 				//{
 					HoobRune.Direction rune_dir = rl.getRune().matches(blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
 					
@@ -215,14 +186,14 @@ public class HoobRunes extends Plugin
 						}
 
 						break; //break out of for loop?
-						*/
+						
 				
-				}
+				}*/
 
 			
 				
 			}
-			return(false);
+			return false;
 		}
 
 	}
