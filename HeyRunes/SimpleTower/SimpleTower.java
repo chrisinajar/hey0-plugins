@@ -13,13 +13,13 @@ public class SimpleTower extends RunePlugin
 	
 	public void initialize()
 	{
-		HoobRune rune = new HoobRune("Tower", new int[][] { 	{-55, -55, -55, -55, -55},
+		HeyRune rune = new HeyRune("Tower", new int[][] { 	{-55, -55, -55, -55, -55},
 															{-55,  55,  55,  55, -55},
 															{-55,  55, -55,  55, -55},
 															{-55,  55,  55,  55, -55},
 															{-55, -55, -55, -55, -55}	});
 		//etc.getLoader().addListener(PluginLoader.Hook.CHAT, l, this, PluginListener.Priority.MEDIUM);
-		HoobRunes hr = (HoobRunes)etc.getLoader().getPlugin("HoobRunes");
+		HeyRunes hr = (HeyRunes)etc.getLoader().getPlugin("HeyRunes");
 		hr.runeloader.addListener(rune, listener, this);
 	}
 	public void disable() { }
