@@ -18,7 +18,7 @@ public class RunePluginLoader {
 
     private static final Logger log = Logger.getLogger("Minecraft");
     private static final Object lock = new Object();
-	private HoobRunes plugin;
+	private HeyRunes plugin;
     private List<RunePlugin> RunePlugins = new ArrayList<RunePlugin>();
 	
 	private List<RuneCraftRegisteredListener> regListeners = new ArrayList<RuneCraftRegisteredListener>();
@@ -30,7 +30,7 @@ public class RunePluginLoader {
      * Creates a RunePlugin loader
      * @param server
      */
-    public RunePluginLoader(HoobRunes plugin) {
+    public RunePluginLoader(HeyRunes plugin) {
         properties = new PropertiesFile("server.properties");
 		this.plugin = plugin;
     }
@@ -185,7 +185,7 @@ public class RunePluginLoader {
      * Returns the server
      * @return
      */
-    public HoobRunes getPlugin() {
+    public HeyRunes getPlugin() {
         return plugin;
     }
 
@@ -198,8 +198,8 @@ public class RunePluginLoader {
     public void callHook(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
 		for (RuneCraftRegisteredListener rl : regListeners)
 		{
-			HoobRune.Direction rune_dir = rl.getRune().matches(blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
-			if (rune_dir != HoobRune.Direction.NONE)
+			HeyRune.Direction rune_dir = rl.getRune().matches(blockClicked.getX(), blockClicked.getY(), blockClicked.getZ());
+			if (rune_dir != HeyRune.Direction.NONE)
 			{
 				RuneCraftListener listener = rl.getListener();
 				listener.runeCreated(player, blockPlaced, blockClicked, itemInHand);
@@ -215,7 +215,7 @@ public class RunePluginLoader {
      * @param parameters
      * @return
      */
-	public RuneCraftRegisteredListener addListener(HoobRune rune, RuneCraftListener listener, RunePlugin plugin)
+	public RuneCraftRegisteredListener addListener(HeyRune rune, RuneCraftListener listener, RunePlugin plugin)
 	{
     	RuneCraftRegisteredListener reg = new RuneCraftRegisteredListener(rune, listener, plugin);
 	    regListeners.add(reg);
