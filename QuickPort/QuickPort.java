@@ -137,7 +137,7 @@ public class QuickPort extends Plugin
     {
 
         public void onArmSwing(Player player) {
-            if ((player.canUseCommand("/QuickPort")) && (player.getItemInHand() == 345))
+            if ((player.canUseCommand("/QuickPort") || player.canUseCommand("/QuickPortNormal")) && (player.getItemInHand() == 345))
             {
                 QuickPortSettings settings = getSettings(player);
 
