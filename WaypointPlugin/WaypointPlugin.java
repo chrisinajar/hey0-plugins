@@ -176,8 +176,10 @@ public class WaypointPlugin extends Plugin
 					e.sendMessage("Correct usage is: /rmwp [name]");
 					return true;
 				}
-				removeWaypoint(e, split[1]);
-				e.sendMessage("Waypoint removed.");
+				if(removeWaypoint(e, split[1]))
+					e.sendMessage("Waypoint removed.");
+				else
+					e.sendMessage("No such waypoint: " + split[1]);
 			} else if (split[0].equalsIgnoreCase("/loc")) {
 				a.info(e.getName() + " is located at " + e.getX() + ", " + e.getY() + ", " + e.getZ());
 				e.sendMessage("Currect location:" + (int)e.getX() + ", " + (int)e.getY() + ", " + (int)e.getZ());
@@ -271,7 +273,7 @@ public class WaypointPlugin extends Plugin
 		writeWaypoint(e, user);
 	}
 	
-	public void removeWaypoint(Player e, String name) {
+	public boolean removeWaypoint(Player e, String name) {
 		User user = null;
 		try {
 			user = users.get(e.getName());
@@ -285,14 +287,18 @@ public class WaypointPlugin extends Plugin
 				users.put(e.getName(), user);
 			} catch (Exception e2) {
 				a.log(Level.SEVERE, "Exception while adding user to array", e2);
-				return;
+				return false;
 			}
 		}
 		try {
+			if(user.waypoints.get(name) == null)
+				return false;
 			user.waypoints.remove(name);
 		} catch (Exception e1) {
+			return false;
 		}
 		writeWaypoint(e, user);
+		return true;
 	}
 
 	private void writeWaypoint(Player e, User user) {
