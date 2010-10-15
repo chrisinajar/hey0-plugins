@@ -155,10 +155,22 @@ public class WaypointPlugin extends Plugin
 				e.teleportTo(wp.location);
 			} else if (split[0].equalsIgnoreCase("/listwp") && e.canUseCommand("/wp")) {
 				String player = e.getName();
-				if (split.length > 1 && e.canUseCommand("/listwpother")) {
-					player = split[1];
+				if (split.length > 1) {
+					if (e.canUseCommand("/listwpother")) {
+						player = split[1];
+					}
+					else
+					{
+						e.sendMessage("You cannot list other player's Waypoints");
+						return true;
+					}
 				}
-				e.sendMessage("Waypoints: " + listWaypoints(player));
+				Player p = etc.getServer().matchPlayer(player);
+				if (p == null) {
+					e.sendMessage("Failed to find player: " + player);
+					return true;
+				}
+				e.sendMessage("Waypoints: " + listWaypoints(p.getName()));
 			} else if (split[0].equalsIgnoreCase("/rmwp") && e.canUseCommand("/wp")) {
 				if (split.length < 2) {
 					e.sendMessage("Correct usage is: /rmwp [name]");
