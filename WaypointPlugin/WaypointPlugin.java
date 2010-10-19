@@ -19,6 +19,7 @@ public class WaypointPlugin extends Plugin
 	private Dictionary<String, User> users = new Hashtable<String, User>();
 	private boolean initialized = false;
 	public String wpLoc = "waypoints.txt";
+	private WaypointListener l = new WaypointListener(this);
 	public class Waypoint {
 		public String name;
 		public Location location = new Location();
@@ -87,6 +88,11 @@ public class WaypointPlugin extends Plugin
 		setName("Waypoints by chrisinajar");
 	}
 
+	public void initialize()
+	{
+		 etc.getLoader().addListener(PluginLoader.Hook.COMMAND, l, this, PluginListener.Priority.MEDIUM);
+	}
+
 	public void init()
 	{
 		if(initialized)
@@ -127,9 +133,16 @@ public class WaypointPlugin extends Plugin
 		etc.getInstance().removeCommand("/listwp");
 	}
 
+	public class WaypointListener extends PluginListener
+	{
+	WaypointPlugin plugin;
+	WaypointListener(WaypointPlugin pl)
+	{
+		plugin = pl;
+	}
 	public boolean onCommand(Player e, String[] split)
 	{
-		init();
+		plugin.init();
 		try {
 			if(!e.canUseCommand(split[0]))
 				return false;
@@ -138,7 +151,7 @@ public class WaypointPlugin extends Plugin
 					e.sendMessage("Correct usage is: /setwp [name]");
 					return true;
 				}
-				setWaypoint(e, split[1]);
+				plugin.setWaypoint(e, split[1]);
 			} else if (split[0].equalsIgnoreCase("/wp")) {
 				if (split.length < 2) {
 					if(e.canUseCommand("/wpother"))
@@ -154,7 +167,7 @@ public class WaypointPlugin extends Plugin
 						player = split[1];
 					wpname = split[2];
 				}
-				Waypoint wp = getWaypoint(player, wpname);
+				Waypoint wp = plugin.getWaypoint(player, wpname);
 				if(wp == null)
 				{
 					e.sendMessage("Failed to find a waypoint by that name");
@@ -180,13 +193,13 @@ public class WaypointPlugin extends Plugin
 					e.sendMessage("Failed to find player: " + player);
 					return true;
 				}
-				e.sendMessage("Waypoints: " + listWaypoints(p.getName()));
+				e.sendMessage("Waypoints: " + plugin.listWaypoints(p.getName()));
 			} else if (split[0].equalsIgnoreCase("/rmwp")) {
 				if (split.length < 2) {
 					e.sendMessage("Correct usage is: /rmwp [name]");
 					return true;
 				}
-				if(removeWaypoint(e, split[1]))
+				if(plugin.removeWaypoint(e, split[1]))
 					e.sendMessage("Waypoint removed.");
 				else
 					e.sendMessage("No such waypoint: " + split[1]);
@@ -198,6 +211,7 @@ public class WaypointPlugin extends Plugin
 			return false;
 		}
 		return true;
+	}
 	}
 
 	public static String combineSplit(int startIndex, String[] string, String seperator) {
