@@ -7,6 +7,8 @@ public class MagicCarpet extends Plugin
 {
 	private static Logger a = Logger.getLogger("Minecraft");
 	private Hashtable carpets = new Hashtable();
+	private Listener l = new Listener(this);
+
 	public MagicCarpet()
 	{
 	}
@@ -58,16 +60,16 @@ public class MagicCarpet extends Plugin
 				return;
 			for(int i = 0; i < fibers.length; i++)
 			{
-				if (fibers[i].imadeit) etc.getServer().setBlockAt(0, (int)currentLoc.x + fibers[i].x, (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z);
+				if (fibers[i].imadeit) etc.getServer().setBlockAt(0, (int)Math.floor(currentLoc.x) + fibers[i].x, (int)Math.floor(currentLoc.y) - fibers[i].y, (int)Math.floor(currentLoc.z) + fibers[i].z);
 				fibers[i].imadeit = false;
 			}
 		}
 		public void drawCarpet() {
 			for(int i = 0; i < fibers.length; i++)
 			{
-				if (!fibers[i].destroyed && etc.getServer().getBlockAt((int)currentLoc.x + fibers[i].x, (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z).getType() == 0) {
+				if (!fibers[i].destroyed && etc.getServer().getBlockAt((int)Math.floor(currentLoc.x) + fibers[i].x, (int)Math.floor(currentLoc.y) - fibers[i].y, (int)Math.floor(currentLoc.z) + fibers[i].z).getType() == 0) {
 					fibers[i].imadeit = true;
-					etc.getServer().setBlockAt(fibers[i].type, (int)currentLoc.x + fibers[i].x, (int)currentLoc.y - fibers[i].y, (int)currentLoc.z + fibers[i].z);
+					etc.getServer().setBlockAt(fibers[i].type, (int)Math.floor(currentLoc.x) + fibers[i].x, (int)Math.floor(currentLoc.y) - fibers[i].y, (int)Math.floor(currentLoc.z) + fibers[i].z);
 				} else {
 					fibers[i].imadeit = false;
 				}
@@ -85,10 +87,12 @@ public class MagicCarpet extends Plugin
 	}
 	public void enable()
 	{
+		etc.getInstance().addCommand("/magiccarpet", "Take yourself wonder by wonder");
 	}
 	
 	public void disable()
 	{
+		etc.getInstance().removeCommand("/magiccarpet");
 		Enumeration e = carpets.elements();
 		//iterate through Hashtable keys Enumeration
 		while(e.hasMoreElements()) {
@@ -97,7 +101,21 @@ public class MagicCarpet extends Plugin
 		}
 		carpets.clear();
 	}
+	
+	public void initialize()
+	{
+		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, l, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, l, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.DISCONNECT, l, this, PluginListener.Priority.MEDIUM);
+	}
 
+
+	public class Listener extends PluginListener {
+	private MagicCarpet plugin;
+	Listener(MagicCarpet pl)
+	{
+		plugin = pl;
+	}
 	public boolean onCommand(Player player, String[] split)
 	{
 		try {
@@ -105,13 +123,19 @@ public class MagicCarpet extends Plugin
 				Carpet carpet = (Carpet)carpets.get(player.getName());
 				if (carpet == null)
 				{
-					player.sendMessage("You are now on a carpet! OH SHIT!");
+					if(player.canUseCommand("/adult_language"))
+						player.sendMessage("You are now on a carpet! OH SHIT!");
+					else
+						player.sendMessage("My goodness dear chap, it would appear you are on some sort of magical carpet capable of arial travel!");
 					carpets.put(player.getName(), new Carpet());
 					return true;
 				}
 				else
 				{
-					player.sendMessage("Poof! The carpet disappears");
+					if(player.canUseCommand("/adult_language"))
+						player.sendMessage("Hot damn! The carpet disappears!");
+					else
+						player.sendMessage("... And as quickly as it arrived, the magically imbued decorative rug leaves you.");
 					carpets.remove(player.getName());
 					Location from = player.getLocation();
 					carpet.removeCarpet();
@@ -125,21 +149,6 @@ public class MagicCarpet extends Plugin
 		return false;
 	}
 	
-	public boolean onBlockDestroy(Player player, Block block) {
-		Carpet carpet = (Carpet)carpets.get(player.getName());
-		if (carpet == null)
-			return false;
-		if(!carpet.getCenterFiber().imadeit)
-			return false;
-		Location from = player.getLocation();
-		if((int)from.x != block.getX() || ((int)from.y -1) != block.getY() || (int)from.z != block.getZ())
-			return false;
-			
-		carpet.removeCarpet();
-		
-		return true;
-	}
-
 	public void onPlayerMove(Player player, Location from, Location to)
 	{
 		Carpet carpet = (Carpet)carpets.get(player.getName());
@@ -159,6 +168,7 @@ public class MagicCarpet extends Plugin
 			return;
 		carpets.remove(player.getName());
 		carpet.removeCarpet();
+	}
 	}
 }
 
