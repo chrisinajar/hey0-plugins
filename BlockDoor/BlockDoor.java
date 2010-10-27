@@ -470,7 +470,7 @@ public class BlockDoor extends Plugin
 				else if (split[0].equalsIgnoreCase("/dlist")) {
 					for (Door d : doors)
 					{
-						player.sendMessage("Listing: '" + d.name + "'");
+						player.sendMessage("Listing: '" + d.creator + " : " + d.name + "'");
 					}
 					player.sendMessage("Size: '" + doors.size() + "'");
 					if (split.length > 1)
