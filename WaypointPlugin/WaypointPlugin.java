@@ -19,6 +19,7 @@ public class WaypointPlugin extends Plugin
 	private Dictionary<String, User> users = new Hashtable<String, User>();
 	private boolean initialized = false;
 	public String wpLoc = "waypoints.txt";
+	private WaypointListener l = new WaypointListener(this);
 	public class Waypoint {
 		public String name;
 		public Location location = new Location();
@@ -87,6 +88,11 @@ public class WaypointPlugin extends Plugin
 		setName("Waypoints by chrisinajar");
 	}
 
+	public void initialize()
+	{
+		 etc.getLoader().addListener(PluginLoader.Hook.COMMAND, l, this, PluginListener.Priority.MEDIUM);
+	}
+
 	public void init()
 	{
 		if(initialized)
@@ -113,23 +119,40 @@ public class WaypointPlugin extends Plugin
 
 	public void enable()
 	{
+		etc.getInstance().addCommand("/wp", "(Player) [wp name] - Teleport to Player's wp. Only name is required.");
+		etc.getInstance().addCommand("/setwp", "[name] - Create or update waypoint here.");
+		etc.getInstance().addCommand("/rmwp", "[name] - Delete named waypoint.");
+		etc.getInstance().addCommand("/listwp", "(Player) - List your, or Player's is specified, waypoints.");
 	}
 
 	public void disable()
 	{
+		etc.getInstance().removeCommand("/wp");
+		etc.getInstance().removeCommand("/setwp");
+		etc.getInstance().removeCommand("/rmwp");
+		etc.getInstance().removeCommand("/listwp");
 	}
 
+	public class WaypointListener extends PluginListener
+	{
+	WaypointPlugin plugin;
+	WaypointListener(WaypointPlugin pl)
+	{
+		plugin = pl;
+	}
 	public boolean onCommand(Player e, String[] split)
 	{
-		init();
+		plugin.init();
 		try {
-			if (split[0].equalsIgnoreCase("/setwp") && e.canUseCommand("/wp")) {
+			if(!e.canUseCommand(split[0]))
+				return false;
+			if (split[0].equalsIgnoreCase("/setwp")) {
 				if (split.length < 2) {
 					e.sendMessage("Correct usage is: /setwp [name]");
 					return true;
 				}
-				setWaypoint(e, split[1]);
-			} else if (split[0].equalsIgnoreCase("/wp") && e.canUseCommand("/wp")) {
+				plugin.setWaypoint(e, split[1]);
+			} else if (split[0].equalsIgnoreCase("/wp")) {
 				if (split.length < 2) {
 					if(e.canUseCommand("/wpother"))
 						e.sendMessage("Correct usage is: /wp (player) [name] -- only name is required");
@@ -144,7 +167,7 @@ public class WaypointPlugin extends Plugin
 						player = split[1];
 					wpname = split[2];
 				}
-				Waypoint wp = getWaypoint(player, wpname);
+				Waypoint wp = plugin.getWaypoint(player, wpname);
 				if(wp == null)
 				{
 					e.sendMessage("Failed to find a waypoint by that name");
@@ -153,7 +176,7 @@ public class WaypointPlugin extends Plugin
 				
 				a.info(e.getName() + " used " + player + "'s wp");
 				e.teleportTo(wp.location);
-			} else if (split[0].equalsIgnoreCase("/listwp") && e.canUseCommand("/wp")) {
+			} else if (split[0].equalsIgnoreCase("/listwp")) {
 				String player = e.getName();
 				if (split.length > 1) {
 					if (e.canUseCommand("/listwpother")) {
@@ -170,17 +193,16 @@ public class WaypointPlugin extends Plugin
 					e.sendMessage("Failed to find player: " + player);
 					return true;
 				}
-				e.sendMessage("Waypoints: " + listWaypoints(p.getName()));
-			} else if (split[0].equalsIgnoreCase("/rmwp") && e.canUseCommand("/wp")) {
+				e.sendMessage("Waypoints: " + plugin.listWaypoints(p.getName()));
+			} else if (split[0].equalsIgnoreCase("/rmwp")) {
 				if (split.length < 2) {
 					e.sendMessage("Correct usage is: /rmwp [name]");
 					return true;
 				}
-				removeWaypoint(e, split[1]);
-				e.sendMessage("Waypoint removed.");
-			} else if (split[0].equalsIgnoreCase("/loc")) {
-				a.info(e.getName() + " is located at " + e.getX() + ", " + e.getY() + ", " + e.getZ());
-				e.sendMessage("Currect location:" + (int)e.getX() + ", " + (int)e.getY() + ", " + (int)e.getZ());
+				if(plugin.removeWaypoint(e, split[1]))
+					e.sendMessage("Waypoint removed.");
+				else
+					e.sendMessage("No such waypoint: " + split[1]);
 			} else {
 				return false;
 			}
@@ -189,6 +211,7 @@ public class WaypointPlugin extends Plugin
 			return false;
 		}
 		return true;
+	}
 	}
 
 	public static String combineSplit(int startIndex, String[] string, String seperator) {
@@ -207,7 +230,10 @@ public class WaypointPlugin extends Plugin
 			if(name.equalsIgnoreCase(pname))
 				return pname;
 		}
-		return etc.getServer().matchPlayer(name).getName();
+		Player p = etc.getServer().matchPlayer(name);
+		if (p == null)
+			return name;
+		return p.getName();
 	}
 
 	public String listWaypoints(String player)
@@ -271,7 +297,7 @@ public class WaypointPlugin extends Plugin
 		writeWaypoint(e, user);
 	}
 	
-	public void removeWaypoint(Player e, String name) {
+	public boolean removeWaypoint(Player e, String name) {
 		User user = null;
 		try {
 			user = users.get(e.getName());
@@ -285,14 +311,18 @@ public class WaypointPlugin extends Plugin
 				users.put(e.getName(), user);
 			} catch (Exception e2) {
 				a.log(Level.SEVERE, "Exception while adding user to array", e2);
-				return;
+				return false;
 			}
 		}
 		try {
+			if(user.waypoints.get(name) == null)
+				return false;
 			user.waypoints.remove(name);
 		} catch (Exception e1) {
+			return false;
 		}
 		writeWaypoint(e, user);
+		return true;
 	}
 
 	private void writeWaypoint(Player e, User user) {
