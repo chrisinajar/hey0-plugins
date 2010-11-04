@@ -63,6 +63,46 @@ public class LowOrbitIonCannon extends Plugin
 		}
 	}
 
+	private void fillUpwards(int blockType, int x, int y, int z)
+	{
+		for (int i = 0; i < 5; ++i)
+		{
+			if (etc.getServer().getBlockIdAt(x, y+i, z) != 0)
+				break;
+			etc.getServer().setBlockAt(blockType, x, y+i, z);
+		}
+	}
+
+	private void placeCylinderPoints(int cx, int cz, int x, int z, int y, int blockType)
+	{
+		if (x == 0)
+		{
+			// Draw the arms
+			fillUpwards(blockType, cx, y, cz + z);
+			fillUpwards(blockType, cx, y, cz - z);
+			fillUpwards(blockType, cx + z, y, cz);
+			fillUpwards(blockType, cx - z, y, cz);
+		}
+		else if (x == z)
+		{
+			fillUpwards(blockType, cx + x, y, cz + z);
+			fillUpwards(blockType, cx - x, y, cz + z);
+			fillUpwards(blockType, cx + x, y, cz - z);
+			fillUpwards(blockType, cx - x, y, cz - z);
+		}
+		else if (x < z)
+		{
+			fillUpwards(blockType, cx + x, y, cz + z);
+			fillUpwards(blockType, cx - x, y, cz + z);
+			fillUpwards(blockType, cx + x, y, cz - z);
+			fillUpwards(blockType, cx - x, y, cz - z);
+			fillUpwards(blockType, cx + z, y, cz + x);
+			fillUpwards(blockType, cx - z, y, cz + x);
+			fillUpwards(blockType, cx + z, y, cz - x);
+			fillUpwards(blockType, cx - z, y, cz - x);
+		}
+	}
+
 	public void circleMidpoint(int xCenter, int yCenter, int radius, int y, int blockType)
 	{
 		int x = 0;
@@ -82,6 +122,25 @@ public class LowOrbitIonCannon extends Plugin
 			}
 			for(int i = z; i >= 0; --i)
 				placePoints(xCenter, yCenter, x, i, y, blockType);
+		}
+	}
+	public void cylinderModpoint(int xCenter, int yCenter, int radius, int y, int blockType)
+	{
+		int x = 0;
+		int z = radius;
+		int p = (5 - radius*4)/4;
+		if(z == 2)
+			p--;
+		placeCylinderPoints(xCenter, yCenter, x, z, y, blockType);
+		while (x < z) {
+			x++;
+			if (p < 0) {
+				p += 2*x+1;
+			} else {
+				z--;
+				p += 2*(x-z)+1;
+			}
+			placeCylinderPoints(xCenter, yCenter, x, z, y, blockType);
 		}
 	}
 
@@ -104,75 +163,9 @@ public class LowOrbitIonCannon extends Plugin
 			{
 				circleMidpoint(block.getX(), block.getZ(), size, i, borderType);
 				circleMidpoint(block.getX(), block.getZ(), size - 1, i, beamType);
-			/*
-				etc.getServer().setBlockAt(beamType, block.getX(), i, block.getZ());
-				etc.getServer().setBlockAt(beamType, block.getX() - 1, i, block.getZ());
-				etc.getServer().setBlockAt(beamType, block.getX() - 1, i, block.getZ() + 1);
-				etc.getServer().setBlockAt(beamType, block.getX() - 1, i, block.getZ() - 1);
-				etc.getServer().setBlockAt(beamType, block.getX() - 1, i, block.getZ() + 2);
-				etc.getServer().setBlockAt(beamType, block.getX() - 1, i, block.getZ() - 2);
-				etc.getServer().setBlockAt(beamType, block.getX() - 1, i, block.getZ() + 3);
-				etc.getServer().setBlockAt(beamType, block.getX() - 1, i, block.getZ() - 3);
-				etc.getServer().setBlockAt(beamType, block.getX() - 2, i, block.getZ());
-				etc.getServer().setBlockAt(beamType, block.getX() - 2, i, block.getZ() + 1);
-				etc.getServer().setBlockAt(beamType, block.getX() - 2, i, block.getZ() - 1);
-				etc.getServer().setBlockAt(beamType, block.getX() - 2, i, block.getZ() + 2);
-				etc.getServer().setBlockAt(beamType, block.getX() - 2, i, block.getZ() - 2);
-				etc.getServer().setBlockAt(beamType, block.getX() - 3, i, block.getZ());
-				etc.getServer().setBlockAt(beamType, block.getX() - 3, i, block.getZ() + 1);
-				etc.getServer().setBlockAt(beamType, block.getX() - 3, i, block.getZ() - 1);
-				etc.getServer().setBlockAt(beamType, block.getX() + 1, i, block.getZ());
-				etc.getServer().setBlockAt(beamType, block.getX() + 1, i, block.getZ() + 1);
-				etc.getServer().setBlockAt(beamType, block.getX() + 1, i, block.getZ() - 1);
-				etc.getServer().setBlockAt(beamType, block.getX() + 1, i, block.getZ() + 2);
-				etc.getServer().setBlockAt(beamType, block.getX() + 1, i, block.getZ() - 2);
-				etc.getServer().setBlockAt(beamType, block.getX() + 1, i, block.getZ() + 3);
-				etc.getServer().setBlockAt(beamType, block.getX() + 1, i, block.getZ() - 3);
-				etc.getServer().setBlockAt(beamType, block.getX() + 2, i, block.getZ());
-				etc.getServer().setBlockAt(beamType, block.getX() + 2, i, block.getZ() + 1);
-				etc.getServer().setBlockAt(beamType, block.getX() + 2, i, block.getZ() - 1);
-				etc.getServer().setBlockAt(beamType, block.getX() + 2, i, block.getZ() + 2);
-				etc.getServer().setBlockAt(beamType, block.getX() + 2, i, block.getZ() - 2);
-				etc.getServer().setBlockAt(beamType, block.getX() + 3, i, block.getZ());
-				etc.getServer().setBlockAt(beamType, block.getX() + 3, i, block.getZ() + 1);
-				etc.getServer().setBlockAt(beamType, block.getX() + 3, i, block.getZ() - 1);
-				etc.getServer().setBlockAt(beamType, block.getX(), i, block.getZ() - 1);
-				etc.getServer().setBlockAt(beamType, block.getX(), i, block.getZ() + 1);
-				etc.getServer().setBlockAt(beamType, block.getX(), i, block.getZ() - 2);
-				etc.getServer().setBlockAt(beamType, block.getX(), i, block.getZ() + 2);
-				etc.getServer().setBlockAt(beamType, block.getX(), i, block.getZ() - 3);
-				etc.getServer().setBlockAt(beamType, block.getX(), i, block.getZ() + 3);
-				
-				// Border
-				etc.getServer().setBlockAt(borderType, block.getX() + 4, i, block.getZ());
-				etc.getServer().setBlockAt(borderType, block.getX() + 4, i, block.getZ() + 1);
-				etc.getServer().setBlockAt(borderType, block.getX() + 4, i, block.getZ() - 1);
-				etc.getServer().setBlockAt(borderType, block.getX() - 4, i, block.getZ());
-				etc.getServer().setBlockAt(borderType, block.getX() - 4, i, block.getZ() + 1);
-				etc.getServer().setBlockAt(borderType, block.getX() - 4, i, block.getZ() - 1);
-				etc.getServer().setBlockAt(borderType, block.getX(), i, block.getZ() + 4);
-				etc.getServer().setBlockAt(borderType, block.getX() - 1, i, block.getZ() + 4);
-				etc.getServer().setBlockAt(borderType, block.getX() + 1, i, block.getZ() + 4);
-				etc.getServer().setBlockAt(borderType, block.getX(), i, block.getZ() - 4);
-				etc.getServer().setBlockAt(borderType, block.getX() - 1, i, block.getZ() - 4);
-				etc.getServer().setBlockAt(borderType, block.getX() + 1, i, block.getZ() - 4);
-				
-				etc.getServer().setBlockAt(borderType, block.getX() + 3, i, block.getZ() - 3);
-				etc.getServer().setBlockAt(borderType, block.getX() + 3, i, block.getZ() + 3);
-				etc.getServer().setBlockAt(borderType, block.getX() - 3, i, block.getZ() - 3);
-				etc.getServer().setBlockAt(borderType, block.getX() - 3, i, block.getZ() + 3);
-				
-				etc.getServer().setBlockAt(borderType, block.getX() - 3, i, block.getZ() - 2);
-				etc.getServer().setBlockAt(borderType, block.getX() - 3, i, block.getZ() + 2);
-				etc.getServer().setBlockAt(borderType, block.getX() + 3, i, block.getZ() - 2);
-				etc.getServer().setBlockAt(borderType, block.getX() + 3, i, block.getZ() + 2);
-				
-				etc.getServer().setBlockAt(borderType, block.getX() - 2, i, block.getZ() - 3);
-				etc.getServer().setBlockAt(borderType, block.getX() - 2, i, block.getZ() + 3);
-				etc.getServer().setBlockAt(borderType, block.getX() + 2, i, block.getZ() - 3);
-				etc.getServer().setBlockAt(borderType, block.getX() + 2, i, block.getZ() + 3);
-				*/
 			}
+			circleMidpoint(block.getX(), block.getZ(), size, 0, 7);
+			cylinderModpoint(block.getX(), block.getZ(), size + 1, 0, 7);
 			etc.getServer().setBlockAt(51, block.getX(), 127, block.getZ());
 		}
 	}
