@@ -64,6 +64,7 @@ public class QuickPort extends Plugin
                     mode = Mode.TUNNEL;
                     player.sendMessage("QuickPort Mode: " + Colors.LightGreen + "Tunnel");
                     break;
+				/*
                 case TUNNEL:
                     if (player.canUseCommand("/QuickPortOther") && etc.getServer().getPlayerList().size() > 1)
                     {
@@ -89,6 +90,7 @@ public class QuickPort extends Plugin
                         player.sendMessage("QuickPort Mode: " + Colors.LightBlue + " Target (" + Colors.White + targetPlayer.getName() + Colors.LightBlue + ")");
                     }
                     break;
+				*/
                 default:
                     mode = Mode.SELF;
                     player.sendMessage("QuickPort Mode: " + Colors.LightGray + "Normal");
