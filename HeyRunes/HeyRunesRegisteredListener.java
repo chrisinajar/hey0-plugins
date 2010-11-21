@@ -1,23 +1,30 @@
-public class HeyRunesRegisteredListener {
+public class HeyRunesRegisteredListener
+{
 	private HeyRune rune;
-    private HeyRunes.Listener listener;
-    private Plugin plugin;
+	private HeyRunesListener listener;
+	private Plugin plugin;
 
-    public HeyRunesRegisteredListener(HeyRune r, HeyRunes.Listener l, Plugin p) {
+	public HeyRunesRegisteredListener(HeyRune r, Object l, Plugin p)
+	{
 		rune = r;
-        listener = l;
-        plugin = p;
-    }
+		listener = new HeyRunesListener(l);
+		plugin = p;
+	}
 
-    public HeyRune getRune() {
-        return rune;
-    }
+	public HeyRune getRune()
+	{
+		return rune;
+	}
 
-    public HeyRunes.Listener getListener() {
-        return listener;
-    }
+	public HeyRunesListener getListener()
+	{
+		return listener;
+	}
 
-    public Plugin getPlugin() {
-        return plugin;
-    }
+	public Plugin getPlugin()
+	{
+		return plugin;
+	}
+
 }
+
