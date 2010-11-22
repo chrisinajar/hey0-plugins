@@ -189,11 +189,10 @@ public class WaypointPlugin extends Plugin
 					}
 				}
 				Player p = etc.getServer().matchPlayer(player);
-				if (p == null) {
-					e.sendMessage("Failed to find player: " + player);
-					return true;
+				if (p != null) {
+					player = p.getName();
 				}
-				e.sendMessage("Waypoints: " + plugin.listWaypoints(p.getName()));
+				e.sendMessage("Waypoints: " + plugin.listWaypoints(player));
 			} else if (split[0].equalsIgnoreCase("/rmwp")) {
 				if (split.length < 2) {
 					e.sendMessage("Correct usage is: /rmwp [name]");

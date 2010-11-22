@@ -1,40 +1,44 @@
-import java.util.Hashtable;
-import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SimpleTower extends RunePlugin
+public class SimpleTower extends Plugin
 {
 	private static Logger a = Logger.getLogger("Minecraft");
-	//private Listener l = new SimpleTowerListener();
 	private SimpleTowerListener listener = new SimpleTowerListener();
 
 	public void enable() { }
-	
+	public void disable() { }
+
 	public void initialize()
 	{
-		HeyRune rune = new HeyRune("Tower", new int[][] { 	{-55, -55, -55, -55, -55},
-															{-55,  55,  55,  55, -55},
-															{-55,  55, -55,  55, -55},
-															{-55,  55,  55,  55, -55},
-															{-55, -55, -55, -55, -55}	});
-		//etc.getLoader().addListener(PluginLoader.Hook.CHAT, l, this, PluginListener.Priority.MEDIUM);
-		HeyRunes hr = (HeyRunes)etc.getLoader().getPlugin("HeyRunes");
-		hr.runeloader.addListener(rune, listener, this);
+		// Creating the nested array for the rune... The numbers are ID's, just draw it out!
+		HeyRune rune = new HeyRune("Tower", new int[][] {
+								{  1,   1,   2,   1,   1},
+								{  1,   1,   1,   1,   1},
+								{  1,   1,   2,   2,   1}
+								});
+		HeyRunes.addListener(rune, listener, this);
 	}
-	public void disable() { }
 	
-	public class SimpleTowerListener extends RuneCraftListener
+	public class SimpleTowerListener extends HeyRunesListener
 	{
-		public void runeCreated(Player player, Block blockPlaced, Block blockClicked, int itemInHand)
+		public void runeCreated(Player player, HeyRune runePlaced, Block block)
 		{
+			// We just build a simple tower to show off it working
 			player.sendMessage("Simple Tower!");
-			for (int y = 0; y < 10; y++)
-			 for (int x = 0; x < 3; x++)
-			  for (int z = 0; z < 3; z++)
-			   if (x != 1 || z != 1)
-				etc.getServer().setBlockAt(4, blockClicked.getX() + x - 1, blockClicked.getY() + 1 + y, blockClicked.getZ() + z - 1);
+			for (int y = 0; y < 10; y++) {
+				for (int x = 0; x < 3; x++) {
+					for (int z = 0; z < 3; z++) {
+						if (x != 1 || z != 1)
+							etc.getServer().setBlockAt(4, block.getX() + x - 1, block.getY() + 1 + y, block.getZ() + z - 1);
+					}
+				}
+			}
+			etc.getServer().setBlockAt(1, block.getX(), block.getY() + 1, block.getZ() + 1);
 		}
 	}
 
 }
+
+
+
