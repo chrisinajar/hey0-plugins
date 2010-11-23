@@ -23,7 +23,7 @@ public class HeyRunes extends Plugin
 	
 	public void initialize()
 	{
-		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.ARM_SWING, listener, this, PluginListener.Priority.HIGH);
 		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, listener, this, PluginListener.Priority.MEDIUM);
 		a.log(Level.INFO, "HeyRunes by chrisinajar Initialized!");
 	}
@@ -38,14 +38,14 @@ public class HeyRunes extends Plugin
 	
 	public class HRListener extends PluginListener
 	{
-		//Toggles through players on server as targets and tunnel mode
-		public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand)
+		public void onArmSwing(Player player)
 		{
 			if ((player.canUseCommand("/HeyRunes")))
 			{
-				int oldId = etc.getServer().getBlockIdAt(blockPlaced.getX(), blockPlaced.getY(), blockPlaced.getZ());
-				etc.getServer().setBlockAt(blockPlaced.getType(), blockPlaced.getX(), blockPlaced.getY(), blockPlaced.getZ());
-				Block blockChecked = blockPlaced;
+				HitBlox blox = new HitBlox(player);
+				Block block = blox.getTargetBlock();
+				if (block == null)
+					return;
 				ArrayList<HeyRune> runeList = new ArrayList<HeyRune>();
 				Hashtable<HeyRune, HeyRunesListener> runeTable = new Hashtable<HeyRune, HeyRunesListener>();
 				int largestRune = 0;
@@ -56,43 +56,12 @@ public class HeyRunes extends Plugin
 					}
 					runeList.add(regListener.getRune());
 					runeTable.put(regListener.getRune(), regListener.getListener());
-					largestRune = (largestRune < regListener.getRune().height() ? regListener.getRune().height() : largestRune);
 				}
-				if ((largestRune % 1) == 1)
-					largestRune++;
-				int halfHeight = largestRune/2;
-				HeyRune match = null;
-				for (int x = 0; x <= halfHeight; ++x)
-				{
-					for (int z = 0; z <= halfHeight; ++z)
-					{
-						blockChecked = etc.getServer().getBlockAt(blockPlaced.getX() + x, blockPlaced.getY(), blockPlaced.getZ() + z);
-						match = HeyRune.match(runeList, blockChecked.getX(), blockChecked.getY(), blockChecked.getZ());
-						if (match != null) {
-							int distance = (z > x ? z : x);
-							if (match.height()/2 > distance)
-								break;
-							match = null;
-						}
-						blockChecked = etc.getServer().getBlockAt(blockPlaced.getX() - x, blockPlaced.getY(), blockPlaced.getZ() - z);
-						match = HeyRune.match(runeList, blockChecked.getX(), blockChecked.getY(), blockChecked.getZ());
-						if (match != null) {
-							int distance = (z > x ? z : x);
-							if (match.height()/2 > distance)
-								break;
-							match = null;
-						}
-					}
-					if (match != null)
-						break;
-				}
+				HeyRune match = HeyRune.match(runeList, block.getX(), block.getY(), block.getZ());
 				if (match != null) {
-					runeTable.get(match).runeCreated(player, match, blockChecked);
+					runeTable.get(match).runeCreated(player, match, block);
 				}
-				etc.getServer().setBlockAt(blockPlaced.getX(), blockPlaced.getY(), blockPlaced.getZ(), oldId);
 			}
-			
-			return false;
 		}
 		
 		public boolean onCommand(Player player, String[] split)
