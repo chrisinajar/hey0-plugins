@@ -8,6 +8,8 @@ import java.util.Scanner;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import java.util.Random;
 
 import java.util.logging.Level;
@@ -20,12 +22,47 @@ public class BlockDoor extends Plugin
 	private Listener l = new Listener(this);
 	private List<Door> doors = new ArrayList<Door>();
     private List<Trigger> triggers = new ArrayList<Trigger>();
+	private List<RedTrig> redtrigs = new ArrayList<RedTrig>();
     private List<Zone> zones = new ArrayList<Zone>();
+    private Whitelist whitelist = new Whitelist();
+	private int max_size = -1;
     
 	private Hashtable playerSettings = new Hashtable();
     public String doorsLoc = "blockdoors.txt";
     
     private boolean initialized = false;
+    
+    private class Whitelist
+    {
+        private List<String> whitelist = new ArrayList<String>();
+        
+        public Whitelist()
+        {
+            PropertiesFile properties = new PropertiesFile("server.properties");
+            whitelist = Arrays.asList(properties.getString("bdwhitelist", "").split(","));
+        }
+        
+        public boolean canUseType(String in_type)
+        {
+            boolean found = false;
+            
+            if (whitelist.size() > 0)
+            {
+                for(String s : whitelist)
+                {
+                    if (s.equalsIgnoreCase(in_type))
+                        found = true;
+                }
+            }
+            else
+            {
+                if (Integer.parseInt(in_type) < 7 && Integer.parseInt(in_type) >= 0)
+                    found = true;
+            }
+                
+            return found;
+        }
+    }
 	
     private class Trigger
     {
@@ -87,6 +124,92 @@ public class BlockDoor extends Plugin
         {
             StringBuilder builder = new StringBuilder();
 			builder.append("TRIGGER:");
+			builder.append(creator);
+			builder.append(":");
+            builder.append(name);
+			builder.append(":");
+            
+            builder.append(Integer.toString(trigger_x));
+            builder.append(":");
+            builder.append(Integer.toString(trigger_y));
+            builder.append(":");
+            builder.append(Integer.toString(trigger_z));
+            builder.append(":");
+            
+            builder.append(Boolean.toString(coordsSet));	
+			builder.append(":");
+			for (Link l : links)
+			{
+				builder.append(l.t_name);
+				builder.append(" ");
+				builder.append(l.t_creator);
+				builder.append(" ");
+				builder.append(l.type.name());
+				builder.append("|");
+			}
+			return builder.toString();
+        }
+    }
+    private class RedTrig
+    {
+        public String name;
+        public String creator;
+        
+        public int trigger_x, trigger_y, trigger_z;
+        public boolean coordsSet;
+        
+        public List<Link> links = new ArrayList<Link>();
+        
+        public RedTrig(String in_name, String in_creator)
+        {
+            name = in_name;
+			creator = in_creator;
+            coordsSet = false;
+        }
+        
+        public RedTrig(String in_string)
+		{
+            String[] split = in_string.split(":");
+            if (split.length == 8)
+            {
+                creator = split[1];
+				name = split[2];
+                
+                
+                
+                trigger_x   = Integer.parseInt(split[3]);
+                trigger_y   = Integer.parseInt(split[4]);
+                trigger_z   = Integer.parseInt(split[5]);
+                coordsSet   = Boolean.parseBoolean(split[6]);
+				String[] linksplit = split[7].split("\\|");
+				for(int i = 0; i < linksplit.length; i++)
+				{
+					Link l = new Link(linksplit[i]);
+					if (l.t_creator != "FAILED")
+					{
+						links.add(l);
+					}
+				}
+            }
+            else
+            {
+                creator = "FAILED";
+                coordsSet = false;
+            }
+		}
+        
+        public void processLinks()
+        {
+            for (Link l : links)
+			{
+				l.process();
+			}
+        }
+        
+        public String toString()
+        {
+            StringBuilder builder = new StringBuilder();
+			builder.append("REDTRIG:");
 			builder.append(creator);
 			builder.append(":");
             builder.append(name);
@@ -514,6 +637,24 @@ public class BlockDoor extends Plugin
 		return index;
 	}
 	
+	public int findRedTrig(String in_name, String in_creator)
+	{
+		int index = -1;
+		for (int i = 0; i < redtrigs.size(); i++)
+			if (redtrigs.get(i).name.equals(in_name) && redtrigs.get(i).creator.equals(in_creator))
+				index = i;
+		
+		if (index == -1)
+		{
+			redtrigs.add(new RedTrig(in_name, in_creator));
+			for (int i = 0; i < redtrigs.size(); i++)
+				if (redtrigs.get(i).name.equals(in_name) && redtrigs.get(i).creator.equals(in_creator))
+					index = i;
+		}
+		
+		return index;
+	}
+	
 	private class BlockDoorSettings
 	{
 		public String command = "";
@@ -551,6 +692,10 @@ public class BlockDoor extends Plugin
 		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_DESTROYED, l, this, PluginListener.Priority.MEDIUM);
         
         initFile();
+		
+		PropertiesFile properties = new PropertiesFile("server.properties");
+		max_size = properties.getInt("bdmaxsize", -1);
+
 	}
     
 	public void initFile()
@@ -585,7 +730,7 @@ public class BlockDoor extends Plugin
 			boolean foundIt = false;
             
 			while ((line = reader.readLine()) != null) {
-				if (!line.contains(type + ":" + creator + "*" + name))
+                if (!line.contains(type + ":" + creator + ":" + name)) //thanks vreon!
 					text += line + "\r\n";
 				else {
 					if(!foundIt)
@@ -704,6 +849,39 @@ public class BlockDoor extends Plugin
 		}
 	}
 	
+	private void writeRedTrig(RedTrig redtrig)
+    {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(doorsLoc)));
+			String line = "", text = "", newline = "";
+			boolean foundIt = false;
+			
+            newline = redtrig.toString();
+            
+			while ((line = reader.readLine()) != null) {
+				if (!line.contains("REDTRIG:" + redtrig.creator + ":" + redtrig.name))
+					text += line + "\r\n";
+				else {
+					if(!foundIt)
+					{
+						foundIt = true;
+						text += newline + "\r\n";
+					}
+				}
+			}
+            
+			if(!foundIt)
+				text += newline + "\r\n";
+			reader.close();
+            
+			FileWriter writer = new FileWriter(doorsLoc);
+			writer.write(text);
+			writer.close();
+		} catch (Exception e1) {
+			a.log(Level.SEVERE, "Exception while editing waypoints in " + doorsLoc, e1);
+		}
+	}
+	
 	public void reloadFile()
     {
 		if (new File(doorsLoc).exists()) {
@@ -741,6 +919,15 @@ public class BlockDoor extends Plugin
                             triggers.add(t);
                         }
                     }
+                    else if (line.startsWith("REDTRIG:"))
+                    {
+                        RedTrig r = new RedTrig(line);
+                        if (r != null && r.creator != "FAILED")
+                        {
+                            a.log(Level.INFO, "Loading redtrig: " + line);
+                            redtrigs.add(r);
+                        }
+                    }
 				}
 			} catch (Exception e) {
 				a.log(Level.SEVERE, "Exception while reading " + doorsLoc, e);
@@ -763,7 +950,7 @@ public class BlockDoor extends Plugin
 			if ((player.canUseCommand("/blockdoor")))
 			{
 				if (split[0].equalsIgnoreCase("/ddoor") || split[0].equalsIgnoreCase("/blockdoor")) {
-					if (split.length < 1)
+					if (split.length < 2)
 					{
 						player.sendMessage("Usage: /ddoor <doorname>");
 					}
@@ -834,19 +1021,62 @@ public class BlockDoor extends Plugin
 				else if (split[0].equalsIgnoreCase("/dfill")) {
 					BlockDoorSettings settings = getSettings(player);
 					int id = -1;
+
 					if (split.length > 2)
 					{
 						id = findDoor(split[1], player.getName());
-						doors.get(id).fill = Integer.parseInt(split[2]);
+                        if(whitelist.canUseType(split[2]) || player.isAdmin())
+                            doors.get(id).fill = Integer.parseInt(split[2]);
+                        else
+                        {
+                            player.sendMessage("Fill type " + split[2] + " is not whitelisted.");
+                            return true;
+                        }
 					}
 					else
 					{
 						id = findDoor(settings.name, player.getName());
-						doors.get(id).fill = Integer.parseInt(split[1]);
+                        if(whitelist.canUseType(split[1]) || player.isAdmin())
+                            doors.get(id).fill = Integer.parseInt(split[1]);
+                        else
+                        {
+                            player.sendMessage("Fill type " + split[1] + " is not whitelisted.");     
+                            return true;
+                        }
 					}
 					writeDoor(doors.get(id));
 					
-					if (settings.verbosity >= 1) { player.sendMessage("Setting door (" + doors.get(id).name + ") type to: " + doors.get(id).fill); }
+					if (settings.verbosity >= 1) { player.sendMessage("Setting door (" + doors.get(id).name + ") fill type to: " + doors.get(id).fill); }
+					return true;
+				}
+				else if (split[0].equalsIgnoreCase("/dempty")) {
+					BlockDoorSettings settings = getSettings(player);
+					int id = -1;
+					if (split.length > 2)
+					{
+						id = findDoor(split[1], player.getName());
+                        if(whitelist.canUseType(split[2]) || player.isAdmin())
+                            doors.get(id).empty = Integer.parseInt(split[2]);
+                        else
+                        {
+                            player.sendMessage("Empty type " + split[2] + " is not whitelisted.");
+                            return true;
+                        }
+					}
+					else
+					{
+						id = findDoor(settings.name, player.getName());
+                        if(whitelist.canUseType(split[1]) || player.isAdmin())
+                            doors.get(id).empty = Integer.parseInt(split[1]);
+                        else
+                        {
+                            player.sendMessage("Empty type " + split[1] + " is not whitelisted.");     
+                            return true;
+                        }
+					}
+					writeDoor(doors.get(id));
+					
+					if (settings.verbosity >= 1) { player.sendMessage("Setting door (" + doors.get(id).name + ") empty type to: " + doors.get(id).fill); }
 					return true;
 				}
 				else if (split[0].equalsIgnoreCase("/dzone")) {
@@ -872,7 +1102,7 @@ public class BlockDoor extends Plugin
 					for (Zone z : zones)
 					{
 						if (z.creator.equalsIgnoreCase(player.getName()))
-							player.sendMessage("Listing Trigger: '" + z.creator + " : " + z.name + "'");
+							player.sendMessage("Listing Zone: '" + z.creator + " : " + z.name + "'");
 					}
  
 					if (split.length > 1)
@@ -891,7 +1121,7 @@ public class BlockDoor extends Plugin
 					}
 					for (Zone z : zones)
 					{
-						player.sendMessage("Listing Trigger: '" + z.creator + " : " + z.name + "'");
+						player.sendMessage("Listing Zone: '" + z.creator + " : " + z.name + "'");
 					}
  
 					if (split.length > 1)
@@ -1052,10 +1282,18 @@ public class BlockDoor extends Plugin
                     if (doors.get(id).fill == 0)
                         doors.get(id).fill = 1;
                     
-					doors.get(id).coordsSet = true;
-					
-                    writeDoor(doors.get(id));
-                    
+					if (max_size != -1 && ((doors.get(id).d_end_x - doors.get(id).d_start_x > max_size) ||
+						(doors.get(id).d_end_y - doors.get(id).d_start_y > max_size) ||
+						(doors.get(id).d_end_z - doors.get(id).d_start_z > max_size)))
+					{
+						if (settings.verbosity >= 1) { player.sendMessage("DOOR DIMENSIONS REJECTED for: '" + settings.name + "'"); }
+						doors.get(id).coordsSet = false;
+					}
+					else
+					{
+						doors.get(id).coordsSet = true;
+                    }
+					writeDoor(doors.get(id));
                     settings.select = 0;
                     settings.command = "";
                 }
@@ -1122,10 +1360,19 @@ public class BlockDoor extends Plugin
                         zones.get(id).t_end_z = blockClicked.getZ();
                     }
                     
-                    zones.get(id).occupants = 0;
-                    zones.get(id).coordsSet = true;
-                    writeZone(zones.get(id));
-                    
+					if (max_size != -1 && ((zones.get(id).t_end_x - zones.get(id).t_start_x > max_size) ||
+						(zones.get(id).t_end_y - zones.get(id).t_start_y > max_size) ||
+						(zones.get(id).t_end_z - zones.get(id).t_start_z > max_size)))
+					{
+						if (settings.verbosity >= 1) { player.sendMessage("ZONE DIMENSIONS REJECTED for: '" + settings.name + "'"); }
+						zones.get(id).coordsSet = false;
+					}
+					else
+					{
+						zones.get(id).occupants = 0;
+						zones.get(id).coordsSet = true;
+                    }
+					writeZone(zones.get(id));
                     settings.select = 0;
                     settings.command = "";
                 }
