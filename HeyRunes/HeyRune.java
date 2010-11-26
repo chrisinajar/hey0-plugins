@@ -128,6 +128,10 @@ public class HeyRune
 		south = true;
 		east = true;
 		west = true;
+		northMatches.clear();
+		southMatches.clear();
+		eastMatches.clear();
+		westMatches.clear();
 	}
 	
 	public static HeyRune match(ArrayList<HeyRune> _r, int x, int y, int z) {
