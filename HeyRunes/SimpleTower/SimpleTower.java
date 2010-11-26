@@ -13,9 +13,9 @@ public class SimpleTower extends Plugin
 	{
 		// Creating the nested array for the rune... The numbers are ID's, just draw it out!
 		HeyRune rune = new HeyRune("Tower", new int[][] {
-								{  1,   1,   2,   1,   1},
-								{  1,   1,   1,   1,   1},
-								{  1,   1,   2,   2,   1}
+								{-101,  1,   2,     1, -101},
+								{   1,  1,   1, -1001,    1},
+								{-102,  1,   2,     2, -102}
 								});
 		HeyRunes.addListener(rune, listener, this);
 	}
