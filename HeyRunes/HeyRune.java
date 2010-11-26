@@ -1,9 +1,10 @@
 /**
-* HeyRune.java - Extend this and register it to listen to specific hooks.
+* HeyRune.java - Handles all the rune matching magic
 * @author chrisinajar
 */
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +21,12 @@ public class HeyRune
 	public boolean south = true;
 	public boolean east = true;
 	public boolean west = true;
+
+	Hashtable<Integer, Integer> northMatches = new Hashtable<Integer, Integer>();
+	Hashtable<Integer, Integer> southMatches = new Hashtable<Integer, Integer>();
+	Hashtable<Integer, Integer> eastMatches = new Hashtable<Integer, Integer>();
+	Hashtable<Integer, Integer> westMatches = new Hashtable<Integer, Integer>();
+
 	
 	public HeyRune(String in_name, int[][] in_pattern) {
 		name = in_name;
@@ -160,6 +167,43 @@ public class HeyRune
 								rune.south = false;
 							}
 							if(rune.west && myId != etc.getServer().getBlockIdAt(-zoffset + x, y, xoffset + z)) {
+								rune.west = false;
+							}
+						} else if (myId < -100 && myId > -200) {
+							if (!rune.northMatches.containsKey(myId)) {
+								rune.northMatches.put(myId, etc.getServer().getBlockIdAt(xoffset + x, y, zoffset + z));
+								rune.eastMatches.put(myId, etc.getServer().getBlockIdAt(zoffset + x, y, -xoffset + z));
+								rune.southMatches.put(myId, etc.getServer().getBlockIdAt(-xoffset + x, y, -zoffset + z));
+								rune.westMatches.put(myId, etc.getServer().getBlockIdAt(-zoffset + x, y, xoffset + z));
+							}
+							if(rune.north && rune.northMatches.get(myId) != etc.getServer().getBlockIdAt(xoffset + x, y, zoffset + z)) {
+								rune.north = false;
+//								a.log(Level.SEVERE, "Not north because of non-match: " + etc.getServer().getBlockIdAt(xoffset + x, y, zoffset + z) + " != " + rune.northMatches.get(myId));
+							}
+							if(rune.east && rune.eastMatches.get(myId) != etc.getServer().getBlockIdAt(zoffset + x, y, -xoffset + z)) {
+								rune.east = false;
+//								a.log(Level.SEVERE, "Not east because of non-match: " + etc.getServer().getBlockIdAt(zoffset + x, y, -xoffset + z) + " != " + rune.eastMatches.get(myId));
+							}
+							if(rune.south && rune.southMatches.get(myId) != etc.getServer().getBlockIdAt(-xoffset + x, y, -zoffset + z)) {
+								rune.south = false;
+//								a.log(Level.SEVERE, "Not south because of non-match: " + etc.getServer().getBlockIdAt(-xoffset + x, y, -zoffset + z) + " != " + rune.southMatches.get(myId));
+							}
+							if(rune.west && rune.westMatches.get(myId) != etc.getServer().getBlockIdAt(-zoffset + x, y, xoffset + z)) {
+								rune.west = false;
+//								a.log(Level.SEVERE, "Not west because of non-match: " + etc.getServer().getBlockIdAt(-zoffset + x, y, xoffset + z) + " != " + rune.westMatches.get(myId));
+							}
+						} else if (myId < -1000) {
+							myId += 1000 - (myId + myId);
+							if(rune.north && myId == etc.getServer().getBlockIdAt(xoffset + x, y, zoffset + z)) {
+								rune.north = false;
+							}
+							if(rune.east && myId == etc.getServer().getBlockIdAt(zoffset + x, y, -xoffset + z)) {
+								rune.east = false;
+							}
+							if(rune.south && myId == etc.getServer().getBlockIdAt(-xoffset + x, y, -zoffset + z)) {
+								rune.south = false;
+							}
+							if(rune.west && myId == etc.getServer().getBlockIdAt(-zoffset + x, y, xoffset + z)) {
 								rune.west = false;
 							}
 						}
