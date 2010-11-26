@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
-
-public class HeyRunesListener
+// extends PluginListener so that you can add hooks from hMod too! Yay!
+public class HeyRunesListener extends PluginListener
 {
 	public void internalRuneCreated(Player pl, String name, ArrayList<Integer> pattern, Block block)
 	{
