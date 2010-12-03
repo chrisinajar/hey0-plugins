@@ -169,7 +169,7 @@ public class CommandAlias extends Plugin
 					if (i != (cmdToRun.length - 1))
 						strCmd += " ";
 				}
-				player.getUser().a.a(new bg(strCmd)); // D: oh noez
+				player.chat(strCmd);
 			}
 			if (runAs != null)
 				player.setGroups(oldGroups);
