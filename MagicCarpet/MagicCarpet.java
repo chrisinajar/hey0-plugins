@@ -119,23 +119,17 @@ public class MagicCarpet extends Plugin
 	public boolean onCommand(Player player, String[] split)
 	{
 		try {
-			if (split[0].equalsIgnoreCase("/magiccarpet") && player.canUseCommand("/magiccarpet")) {
+			if ((split[0].equalsIgnoreCase("/magiccarpet") || split[0].equalsIgnoreCase("/mc")) && player.canUseCommand("/magiccarpet")) {
 				Carpet carpet = (Carpet)carpets.get(player.getName());
 				if (carpet == null)
 				{
-					if(player.canUseCommand("/adult_language"))
-						player.sendMessage("You are now on a carpet! OH SHIT!");
-					else
-						player.sendMessage("My goodness dear chap, it would appear you are on some sort of magical carpet capable of arial travel!");
+					player.sendMessage("A glass carpet appears below your feet.");
 					carpets.put(player.getName(), new Carpet());
 					return true;
 				}
 				else
 				{
-					if(player.canUseCommand("/adult_language"))
-						player.sendMessage("Hot damn! The carpet disappears!");
-					else
-						player.sendMessage("... And as quickly as it arrived, the magically imbued decorative rug leaves you.");
+					player.sendMessage("Poof! The magic carpet disappears.");
 					carpets.remove(player.getName());
 					Location from = player.getLocation();
 					carpet.removeCarpet();
