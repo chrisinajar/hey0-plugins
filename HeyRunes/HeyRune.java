@@ -30,12 +30,14 @@ public class HeyRune
 	
 	public HeyRune(String in_name, int[][] in_pattern) {
 		name = in_name;
+		direction = Direction.NONE;
 		windPattern(in_pattern);
 	}
 
 	public HeyRune(String in_name, ArrayList<Integer> in_pattern)
 	{
 		name = in_name;
+		direction = Direction.NONE;
 		pattern = in_pattern;
 	}
 
@@ -132,13 +134,14 @@ public class HeyRune
 		southMatches.clear();
 		eastMatches.clear();
 		westMatches.clear();
+		direction = Direction.NONE;
 	}
 	
 	public static HeyRune match(ArrayList<HeyRune> _r, int x, int y, int z) {
 		ArrayList<HeyRune> runes = new ArrayList<HeyRune>(_r);
 		HeyRune victor = null;
-		Direction victorD = null;
-		
+		Direction victorD = Direction.NONE;
+
 		int size = 0;
 		for (HeyRune r : runes) {
 			size = (size < r.size() ? r.size() : size);
@@ -173,7 +176,7 @@ public class HeyRune
 							if(rune.west && myId != etc.getServer().getBlockIdAt(-zoffset + x, y, xoffset + z)) {
 								rune.west = false;
 							}
-						} else if (myId < -100 && myId > -200) {
+						} else if (myId <= -100 && myId > -200) {
 							if (!rune.northMatches.containsKey(myId)) {
 								rune.northMatches.put(myId, etc.getServer().getBlockIdAt(xoffset + x, y, zoffset + z));
 								rune.eastMatches.put(myId, etc.getServer().getBlockIdAt(zoffset + x, y, -xoffset + z));
@@ -196,7 +199,7 @@ public class HeyRune
 								rune.west = false;
 //								a.log(Level.SEVERE, "Not west because of non-match: " + etc.getServer().getBlockIdAt(-zoffset + x, y, xoffset + z) + " != " + rune.westMatches.get(myId));
 							}
-						} else if (myId < -1000) {
+						} else if (myId <= -1000) {
 							myId += 1000 - (myId + myId);
 							if(rune.north && myId == etc.getServer().getBlockIdAt(xoffset + x, y, zoffset + z)) {
 								rune.north = false;
@@ -235,7 +238,7 @@ public class HeyRune
 				} catch (Throwable t) {
 					a.log(Level.SEVERE, "Exception while iterating a rune " + t);
 				}
-				switch((i)%4) {
+				switch ((i)%4) {
 					case 1:
 						zoffset++;
 						break;
@@ -252,6 +255,8 @@ public class HeyRune
 				index++;
 			}
 		}
+		victor.direction = victorD;
 		return victor;
 	}
 }
+

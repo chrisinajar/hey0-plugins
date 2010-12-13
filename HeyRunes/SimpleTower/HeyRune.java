@@ -24,12 +24,23 @@ public class HeyRune
 	public HeyRune(String in_name, int[][] in_pattern) {
 		name = in_name;
 		windPattern(in_pattern);
+		direction = Direction.NONE;
 	}
 
+	// old constructor for reverse compatibility
 	public HeyRune(String in_name, ArrayList<Integer> in_pattern)
 	{
 		name = in_name;
 		pattern = in_pattern;
+		direction = Direction.NONE;
+	}
+
+	// new direciton handling
+	public HeyRune(String in_name, ArrayList<Integer> in_pattern, int in_direction)
+	{
+		name = in_name;
+		pattern = in_pattern;
+		direction = Direction.values()[in_direction];
 	}
 
 	public String name()
@@ -121,5 +132,6 @@ public class HeyRune
 		south = true;
 		east = true;
 		west = true;
+		direction = Direction.NONE;
 	}
 }

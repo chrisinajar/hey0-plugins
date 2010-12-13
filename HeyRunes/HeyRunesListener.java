@@ -31,7 +31,8 @@ public class HeyRunesListener
 			if (methods[i].getName().equals("internalRuneCreated"))
 			{
 				callback = methods[i];
-				break;
+				if (callback.getParameterTypes().length == 5) // new direciton function
+					break;
 			}
 		}
 		if (callback == null)
@@ -40,9 +41,13 @@ public class HeyRunesListener
 			return;
 		}
 		try {
-			callback.invoke(list, player, runePlaced.name(), runePlaced.pattern(), block);
+			// Reverse compatibility between new direction passing
+			if (callback.getParameterTypes().length == 5)
+				callback.invoke(list, player, runePlaced.name(), runePlaced.pattern(), runePlaced.direction.ordinal(), block);
+			else
+				callback.invoke(list, player, runePlaced.name(), runePlaced.pattern(), block);
 		} catch (Exception ex) {
 			a.log(Level.SEVERE, "Exception while attempting call the listeners internal callback function: " + ex);
-		}	
+		}
 	}
 }
