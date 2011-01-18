@@ -8,6 +8,11 @@ public class HeyRunes
 	private static Logger a = Logger.getLogger("Minecraft");
 	public static void addListener(HeyRune rune, HeyRunesListener list, Plugin pl)
 	{
+		addListener(rune, list, pl, HeyRune.MatchType.NONE);
+	}
+
+	public static void addListener(HeyRune rune, HeyRunesListener list, Plugin pl, HeyRune.MatchType mt)
+	{
 		Plugin hrpl = etc.getLoader().getPlugin("HeyRunes");
 		if (hrpl == null)
 		{
@@ -37,6 +42,11 @@ public class HeyRunes
 		} catch (Exception ex) {
 			a.log(Level.SEVERE, "Exception while attempting to register HeyRunes listener: " + ex);
 		}
+	}
+
+	public static boolean hasHeyRunes()
+	{
+		return (etc.getLoader().getPlugin("HeyRunes") != null);
 	}
 }
 

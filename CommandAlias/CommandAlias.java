@@ -27,6 +27,7 @@ public class CommandAlias extends Plugin
 	}
 
 	public void enable() {
+		JarPlugins.checkUpdatrFile(getClass().getName(), "0.3.0");
 		this.reloadConfig();
 		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, l, this, PluginListener.Priority.MEDIUM);
 	}

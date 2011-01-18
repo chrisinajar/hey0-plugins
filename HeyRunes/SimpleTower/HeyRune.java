@@ -12,7 +12,10 @@ import java.util.logging.Logger;
 public class HeyRune
 {
 	private static Logger a = Logger.getLogger("Minecraft");
+
 	public static enum Direction { NORTH, SOUTH, EAST, WEST, NONE }
+	public static enum MatchType { NONE, onPlayerMove, onArmSwing } // On any kind of error or version mismatch, "NONE" is used.
+
 	private ArrayList<Integer> pattern = new ArrayList<Integer>();
 	public String name;
 	public Direction direction;
@@ -68,6 +71,86 @@ public class HeyRune
 			return -1;
 		}
 	}
+
+/*
+	// I overload, what of it.
+	public void removeRune(int x, int y, int z)
+	{
+		removeRune(x, y, z, true, true);
+	}
+
+	public void removeRune(int x, int y, int z, boolean removeSignatures)
+	{
+		removeRune(x, y, z, removeSignatures, true);
+	}
+
+	public void removeRune(int x, int y, int z, boolean removeSignatures, boolean removeExceptions)
+	{
+		if (direction == NONE)
+		{
+			a.log(Level.SEVERE, "Cannot remove rune, " + name() + ", until it is matched.");
+		}
+		int index = 0;
+		int xoffset = 0;
+		int yoffset = 0;
+		int zoffset = 0;
+		int curX = x;
+		int cuyY = y;
+		int curZ = z;
+		for (int i = 0; index < size; ++i) {
+			for (int j = 0; j < ((i/2) + 1); ++j) {
+				switch(direction)
+				{
+					case NORTH:
+						curX = zoffset + x;
+						curZ = -xoffset + z;
+						break;
+					case SOUTH:
+						curX = -zoffset + x;
+						curZ = xoffset + z;
+						break;
+					case EAST:
+						curX = xoffset + x;
+						curZ = zoffset + z;
+						break;
+					case WEST:
+						curX = -xoffset + x;
+						curZ = -zoffset + z;
+						break;
+				}
+				int myId = rune.at(index);
+				if (myId > 0)
+				{
+					if (etc.getServer().getBlockIdAt(curX, curY, curZ) == myId)
+						etc.getServer().setBlockAt(0, curX, curY, curZ);
+				}
+				else if (removeSignatures && myId <= -100 && myId > -200)
+				{
+//					if (etc.getServer().getBlockIdAt(curX, curY, curZ) == getSignatureBlockId(myId))
+//						etc.getServer().setBlockAt(0, curX, curY, curZ);
+				}
+				else if (removeExceptions && myId <= -1000)
+					etc.getServer().setBlockAt(0, curX, curY, curZ);
+
+				switch ((i)%4) {
+					case 1:
+						zoffset++;
+						break;
+					case 0:
+						xoffset++;
+						break;
+					case 3:
+						zoffset--;
+						break;
+					case 2:
+						xoffset--;
+						break;
+				}
+				index++;
+			}
+		}
+	}
+*/
 	
 	private void windPattern(int[][] p) {
 		double height = p.length;

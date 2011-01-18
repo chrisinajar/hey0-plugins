@@ -14,8 +14,10 @@ public class HeyRunesListener
 		list = l;
 	}
 
-	public void runeCreated(Player player, HeyRune runePlaced, Block block)
+	public void runeCreated(Player player, HeyRune runePlaced, Block block, HeyRune.MatchType mt)
 	{
+		int paramCount = 7;
+
 		if (list == null)
 		{
 			a.log(Level.SEVERE, "Null listener found in HeyRunes");
@@ -30,8 +32,11 @@ public class HeyRunesListener
 		{
 			if (methods[i].getName().equals("internalRuneCreated"))
 			{
+				if (callback != null && callback.getParameterTypes().length > methods[i].getParameterTypes().length)
+					continue; // Don't get older versions
 				callback = methods[i];
-				if (callback.getParameterTypes().length == 5) // new direciton function
+
+				if (callback.getParameterTypes().length == paramCount) // break on "newest" function
 					break;
 			}
 		}
@@ -42,10 +47,26 @@ public class HeyRunesListener
 		}
 		try {
 			// Reverse compatibility between new direction passing
-			if (callback.getParameterTypes().length == 5)
-				callback.invoke(list, player, runePlaced.name(), runePlaced.pattern(), runePlaced.direction.ordinal(), block);
-			else
-				callback.invoke(list, player, runePlaced.name(), runePlaced.pattern(), block);
+			switch (callback.getParameterTypes().length)
+			{
+				case 7:
+					callback.invoke(list, player,
+						runePlaced.name(), runePlaced.pattern(), runePlaced.signatureBlocks(), runePlaced.direction.ordinal(),
+						mt.ordinal(), block);
+				case 6:
+					callback.invoke(list, player,
+						runePlaced.name(), runePlaced.pattern(), runePlaced.direction.ordinal(),
+						mt.ordinal(), block);
+					break;
+				case 5:
+					callback.invoke(list, player, runePlaced.name(), runePlaced.pattern(), runePlaced.direction.ordinal(), block);
+					break;
+				case 4:
+					callback.invoke(list, player, runePlaced.name(), runePlaced.pattern(), block);
+					break;
+				default:
+					throw new Exception("Invalid number of arguments in internalRuneCreated");
+			}
 		} catch (Exception ex) {
 			a.log(Level.SEVERE, "Exception while attempting call the listeners internal callback function: " + ex);
 		}

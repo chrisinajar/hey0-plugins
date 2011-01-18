@@ -8,9 +8,15 @@ public class LowOrbitIonCannon extends Plugin
 {
 	private static Logger a = Logger.getLogger("Minecraft");
 	private Listener listener = new Listener();
+
+        public void enable()
+        {
+                JarPlugins.checkUpdatrFile(getClass().getName(), "1.2.0");
+        }
+
 	public class Listener extends PluginListener {
 	Hashtable cannons = new Hashtable();
-	
+
 	public boolean onCommand(Player player, String[] split) {
 		if(!player.canUseCommand(split[0]))
 			return false;
@@ -175,10 +181,6 @@ public class LowOrbitIonCannon extends Plugin
 	{
 		etc.getLoader().addListener(PluginLoader.Hook.ARM_SWING, listener, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, listener, this, PluginListener.Priority.MEDIUM);
-	}
-	
-	public void enable()
-	{
 	}
 
 	public void disable()

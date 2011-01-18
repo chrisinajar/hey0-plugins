@@ -20,6 +20,16 @@ public class WaypointPlugin extends Plugin
 	private boolean initialized = false;
 	public String wpLoc = "waypoints.txt";
 	private WaypointListener l = new WaypointListener(this);
+
+        public void enable()
+        {
+                JarPlugins.checkUpdatrFile(getClass().getName(), "1.3.0");
+                etc.getInstance().addCommand("/wp", "(Player) [wp name] - Teleport to Player's wp. Only name is required.");
+                etc.getInstance().addCommand("/setwp", "[name] - Create or update waypoint here.");
+                etc.getInstance().addCommand("/rmwp", "[name] - Delete named waypoint.");
+                etc.getInstance().addCommand("/listwp", "(Player) - List your, or Player's is specified, waypoints.");
+        }
+
 	public class Waypoint {
 		public String name;
 		public Location location = new Location();
@@ -117,14 +127,6 @@ public class WaypointPlugin extends Plugin
 		this.reload();
 	}
 
-	public void enable()
-	{
-		etc.getInstance().addCommand("/wp", "(Player) [wp name] - Teleport to Player's wp. Only name is required.");
-		etc.getInstance().addCommand("/setwp", "[name] - Create or update waypoint here.");
-		etc.getInstance().addCommand("/rmwp", "[name] - Delete named waypoint.");
-		etc.getInstance().addCommand("/listwp", "(Player) - List your, or Player's is specified, waypoints.");
-	}
-
 	public void disable()
 	{
 		etc.getInstance().removeCommand("/wp");
@@ -150,6 +152,14 @@ public class WaypointPlugin extends Plugin
 				if (split.length < 2) {
 					e.sendMessage("Correct usage is: /setwp [name]");
 					return true;
+				}
+				Player player = e;
+				if (split.length > 2) {
+					if (e.canUseCommand("/setwpother"))
+					{
+						e.sendMessage("You do not have access to set waypoints for other players.");
+						return true;
+					}
 				}
 				plugin.setWaypoint(e, split[1]);
 			} else if (split[0].equalsIgnoreCase("/wp")) {
@@ -261,10 +271,10 @@ public class WaypointPlugin extends Plugin
 		return null;
 	}
 	
-	public void setWaypoint(Player e, String name) {
+	public String setWaypoint(String e, String name) {
 		User user = null;
 		try {
-			user = users.get(e.getName());
+			user = users.get(e);
 		} catch (Exception e1) {
 		}
 		
@@ -272,7 +282,7 @@ public class WaypointPlugin extends Plugin
 			// User doesn't exist, add it to the array.
 			try {
 				user = new User();
-				users.put(e.getName(), user);
+				users.put(e, user);
 			} catch (Exception e2) {
 				a.log(Level.SEVERE, "Exception while adding user to array", e2);
 				return;
@@ -288,12 +298,13 @@ public class WaypointPlugin extends Plugin
 			wp = new Waypoint("");
 			user.waypoints.put(name, wp);
 			wp.name = name;
+			wp.location = e.getLocation();
+			writeWaypoint(user);
 			e.sendMessage("Created new waypoint called: " + name);
 		}
 		else
 			e.sendMessage("Updated location for waypoint: " + name);
-		wp.location = e.getLocation();
-		writeWaypoint(e, user);
+		writeWaypoint(user);
 	}
 	
 	public boolean removeWaypoint(Player e, String name) {

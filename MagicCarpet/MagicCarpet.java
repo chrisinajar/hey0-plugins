@@ -12,6 +12,13 @@ public class MagicCarpet extends Plugin
 	public MagicCarpet()
 	{
 	}
+
+        public void enable()
+        {
+                JarPlugins.checkUpdatrFile(getClass().getName(), "1.3.0");
+                etc.getInstance().addCommand("/magiccarpet", "Take yourself wonder by wonder");
+        }
+
 	public class CarpetFiber
 	{
 		public CarpetFiber(int x, int y, int z, int type)
@@ -85,11 +92,7 @@ public class MagicCarpet extends Plugin
 			return null;
 		}
 	}
-	public void enable()
-	{
-		etc.getInstance().addCommand("/magiccarpet", "Take yourself wonder by wonder");
-	}
-	
+
 	public void disable()
 	{
 		etc.getInstance().removeCommand("/magiccarpet");
